@@ -6,7 +6,8 @@
   "scripts": {
     "lint": "eslint",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf node_modules package-lock.json pnpm-lock.yaml yarn.lock & pnpm install"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",
