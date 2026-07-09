@@ -6,20 +6,15 @@ import { DocumentEditorShell } from "./components/document-editor-shell"
 import { DocumentMetadataPanel } from "./components/document-metadata-panel"
 import { documentDetailStyles } from "./document-detail.styles"
 import { loadDocumentById } from "@/modules/documents/services/document-data"
-import type { DocumentRecord } from "@/modules/documents/types"
-
 interface DocumentDetailPageProps {
   documentId: string
 }
 
 export function DocumentDetailPage({ documentId }: DocumentDetailPageProps) {
-  const [document, setDocument] = React.useState<DocumentRecord | null>(() =>
-    loadDocumentById(documentId)
+  const document = React.useMemo(
+    () => loadDocumentById(documentId),
+    [documentId]
   )
-
-  React.useEffect(() => {
-    setDocument(loadDocumentById(documentId))
-  }, [documentId])
 
   return (
     <div className={documentDetailStyles.layout}>
@@ -31,6 +26,7 @@ export function DocumentDetailPage({ documentId }: DocumentDetailPageProps) {
           </h1>
         </div>
         <DocumentEditorShell
+          key={documentId}
           documentId={documentId}
           initialDocument={document}
         />

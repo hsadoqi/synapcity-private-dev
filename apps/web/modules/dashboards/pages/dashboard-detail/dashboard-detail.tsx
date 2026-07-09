@@ -15,7 +15,6 @@ import {
   saveDashboardWidgets,
 } from "@/modules/dashboards/services/dashboard-layout-data"
 import type {
-  DashboardRecord,
   DashboardLayout,
   WidgetInstance,
 } from "@/modules/dashboards/types"
@@ -25,9 +24,11 @@ interface DashboardDetailPageProps {
 }
 
 export function DashboardDetailPage({ dashboardId }: DashboardDetailPageProps) {
-  const [dashboard, setDashboard] = React.useState<DashboardRecord | null>(() =>
-    loadDashboardById(dashboardId)
-  )
+const dashboard = React.useMemo(
+  () => loadDashboardById(dashboardId),
+  [dashboardId]
+)
+
   const [isEditing, setIsEditing] = React.useState(false)
   const [selectedWidget, setSelectedWidget] = React.useState("document-card")
   const [widgets, setWidgets] = React.useState<WidgetInstance[]>(() =>
@@ -36,13 +37,6 @@ export function DashboardDetailPage({ dashboardId }: DashboardDetailPageProps) {
   const [layout, setLayout] = React.useState<DashboardLayout>(() =>
     loadDashboardLayout(dashboardId)
   )
-
-  React.useEffect(() => {
-    setDashboard(loadDashboardById(dashboardId))
-    setWidgets(loadDashboardWidgets(dashboardId))
-    setLayout(loadDashboardLayout(dashboardId))
-    setIsEditing(false)
-  }, [dashboardId])
 
   const handleAddWidget = (widgetType: string) => {
     const nextWidget = createDashboardWidget(

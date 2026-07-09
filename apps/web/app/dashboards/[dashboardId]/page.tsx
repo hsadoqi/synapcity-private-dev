@@ -8,5 +8,5 @@ export default async function DashboardDetailRoute({
   params,
 }: DashboardDetailRouteProps) {
   const { dashboardId } = await params
-  return <DashboardDetailPage dashboardId={dashboardId} />
+  return <DashboardDetailPage key={dashboardId} dashboardId={dashboardId} />
 }

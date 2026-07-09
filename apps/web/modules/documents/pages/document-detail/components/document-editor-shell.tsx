@@ -14,19 +14,11 @@ export function DocumentEditorShell({
   documentId,
   initialDocument,
 }: DocumentEditorShellProps) {
-  const [document, setDocument] = React.useState<DocumentRecord | null>(
-    initialDocument ?? null
-  )
+  const [document, setDocument] = React.useState(initialDocument ?? null)
   const [title, setTitle] = React.useState(
     initialDocument?.title ?? "Untitled document"
   )
   const [content, setContent] = React.useState(initialDocument?.content ?? "")
-
-  React.useEffect(() => {
-    setDocument(initialDocument ?? null)
-    setTitle(initialDocument?.title ?? "Untitled document")
-    setContent(initialDocument?.content ?? "")
-  }, [initialDocument])
 
   const handleSave = () => {
     if (!document) {
