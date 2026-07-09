@@ -11,7 +11,7 @@ export interface ThemeRecord {
 
 export interface ThemeAssignment {
   id: string
-  scopeType: "root" | "dashboard" | "document" | "panel" | "widget"
+  scopeType: ThemeScopeType
   scopeId: string
   themeId: string
   createdAt: string
@@ -28,3 +28,5 @@ export const DEFAULT_THEME_RECORD: ThemeRecord = {
   createdAt: "2026-01-01T00:00:00.000Z",
   updatedAt: "2026-01-01T00:00:00.000Z",
 }
+
+export type ThemeScopeType = "root" | "dashboard" | "document" | "panel" | "widget"
