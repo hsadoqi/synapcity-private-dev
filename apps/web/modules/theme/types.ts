@@ -1,7 +1,17 @@
+export const THEME_PALETTE_STEPS = [
+  50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950,
+] as const
+
+export type ThemePaletteStep = (typeof THEME_PALETTE_STEPS)[number]
+
+export type ThemeScopeType = "root" | "dashboard" | "document" | "panel" | "widget"
+
 export interface ThemeRecord {
   id: string
   name: string
+  /** Identity seed only. Runtime derives --primary-50...950 from this. */
   primaryOklch: string
+  /** Identity seed only. Runtime derives --accent-50...950 from this. */
   accentOklch: string
   mode?: "light" | "dark" | "system"
   version: number
@@ -11,8 +21,10 @@ export interface ThemeRecord {
 
 export interface ThemeAssignment {
   id: string
-  scopeType: "root" | "dashboard" | "document" | "panel" | "widget"
+  scopeType: ThemeScopeType
+  /** Entity/scope id, not the saved theme id. Example: app, dashboard-1, document-1. */
   scopeId: string
+  /** Persisted ThemeRecord.id. */
   themeId: string
   createdAt: string
   updatedAt: string

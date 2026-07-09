@@ -3,10 +3,10 @@
 import * as React from "react"
 
 import { buildThemeVariables } from "./theme-engine"
-import { type ThemeRecord } from "./types"
+import { type ThemeRecord, type ThemeScopeType } from "./types"
 
 interface ThemeScopeProviderProps {
-  scopeType?: string
+  scopeType?: ThemeScopeType
   scopeId?: string
   theme?: ThemeRecord | null
   children: React.ReactNode
@@ -16,29 +16,29 @@ interface ThemeScopeProviderProps {
 export function ThemeScopeProvider({
   scopeType = "root",
   scopeId = "app",
-  theme,
+  theme = null,
   children,
   className,
 }: ThemeScopeProviderProps) {
-  const containerRef = React.useRef<HTMLDivElement>(null)
-
-  React.useEffect(() => {
-    const target = containerRef.current ?? document.documentElement
-
-    if (theme) {
-      const cssVars = buildThemeVariables(theme.primaryOklch, theme.accentOklch)
-      Object.entries(cssVars).forEach(([name, value]) => {
-        target.style.setProperty(name, value)
-      })
+  const primaryOklch = theme?.primaryOklch
+  const accentOklch = theme?.accentOklch
+  const cssVars = React.useMemo<React.CSSProperties | undefined>(() => {
+    if (!primaryOklch || !accentOklch) {
+      return undefined
     }
-  }, [theme])
+
+    return buildThemeVariables(
+      primaryOklch,
+      accentOklch
+    ) as React.CSSProperties
+  }, [accentOklch, primaryOklch])
 
   const isExplicitTheme = Boolean(theme)
 
   return (
     <div
-      ref={containerRef}
       className={className}
+      style={cssVars}
       data-theme-scope={scopeType}
       data-theme-scope-id={scopeId}
       data-theme-source={isExplicitTheme ? "explicit" : "inherited"}
