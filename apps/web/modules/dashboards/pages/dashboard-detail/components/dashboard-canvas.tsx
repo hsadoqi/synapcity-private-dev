@@ -6,6 +6,7 @@ import type {
   DashboardLayout,
   WidgetInstance,
 } from "@/modules/dashboards/types"
+import { ThemeScopeProvider } from "@/modules/theme"
 
 interface DashboardCanvasProps {
   dashboardId: string
@@ -71,17 +72,21 @@ export function DashboardCanvas({
       <div className="mt-6 grid gap-3 md:grid-cols-2">
         {widgets.length > 0 ? (
           widgets.map((widget) => (
-            <div
+            <ThemeScopeProvider
               key={widget.id}
+              scope="widget"
+              scopeId={widget.id}
               className="rounded-lg border border-border bg-background/70 p-4"
             >
-              <div className="text-sm font-medium">
-                {widget.title ?? widget.widgetType}
+              <div>
+                <div className="text-sm font-medium">
+                  {widget.title ?? widget.widgetType}
+                </div>
+                <div className="mt-2 text-sm text-muted-foreground">
+                  {widget.widgetType}
+                </div>
               </div>
-              <div className="mt-2 text-sm text-muted-foreground">
-                {widget.widgetType}
-              </div>
-            </div>
+            </ThemeScopeProvider>
           ))
         ) : (
           <div className="rounded-lg border border-dashed border-border bg-background/70 p-4 text-sm text-muted-foreground">
