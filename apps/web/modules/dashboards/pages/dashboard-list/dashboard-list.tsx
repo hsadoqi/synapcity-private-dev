@@ -1,5 +1,7 @@
 import Link from "next/link"
 
+import { dashboardListStyles } from "./dashboard-list.styles"
+
 const sampleDashboards = [
   { id: "db-1", title: "Weekly review", slug: "weekly-review" },
   { id: "db-2", title: "Product launch", slug: "product-launch" },
@@ -7,21 +9,25 @@ const sampleDashboards = [
 
 export function DashboardListPage() {
   return (
-    <div className="space-y-4">
-      <div>
+    <div className={dashboardListStyles.page}>
+      <div className={dashboardListStyles.heading}>
         <p className="text-sm text-muted-foreground">Dashboards</p>
-        <h1 className="text-3xl font-semibold tracking-tight">Dashboard library</h1>
+        <h1 className={dashboardListStyles.title}>Dashboard library</h1>
       </div>
 
-      <div className="grid gap-3">
+      <div className={dashboardListStyles.list}>
         {sampleDashboards.map((dashboard) => (
           <Link
             key={dashboard.id}
             href={`/dashboards/${dashboard.id}`}
-            className="rounded-lg border border-border bg-card p-4 text-left shadow-sm transition hover:border-primary"
+            className={dashboardListStyles.card}
           >
-            <div className="font-medium">{dashboard.title}</div>
-            <div className="mt-1 text-sm text-muted-foreground">/{dashboard.slug}</div>
+            <div className={dashboardListStyles.cardTitle}>
+              {dashboard.title}
+            </div>
+            <div className={dashboardListStyles.cardMeta}>
+              /{dashboard.slug}
+            </div>
           </Link>
         ))}
       </div>
