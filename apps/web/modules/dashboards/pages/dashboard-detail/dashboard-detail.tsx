@@ -24,10 +24,10 @@ interface DashboardDetailPageProps {
 }
 
 export function DashboardDetailPage({ dashboardId }: DashboardDetailPageProps) {
-const dashboard = React.useMemo(
-  () => loadDashboardById(dashboardId),
-  [dashboardId]
-)
+  const dashboard = React.useMemo(
+    () => loadDashboardById(dashboardId),
+    [dashboardId]
+  )
 
   const [isEditing, setIsEditing] = React.useState(false)
   const [selectedWidget, setSelectedWidget] = React.useState("document-card")

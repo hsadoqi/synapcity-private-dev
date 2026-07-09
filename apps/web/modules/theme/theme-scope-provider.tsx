@@ -27,10 +27,7 @@ export function ThemeScopeProvider({
       return undefined
     }
 
-    return buildThemeVariables(
-      primaryOklch,
-      accentOklch
-    ) as React.CSSProperties
+    return buildThemeVariables(primaryOklch, accentOklch) as React.CSSProperties
   }, [accentOklch, primaryOklch])
 
   const isExplicitTheme = Boolean(theme)

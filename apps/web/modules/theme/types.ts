@@ -4,7 +4,12 @@ export const THEME_PALETTE_STEPS = [
 
 export type ThemePaletteStep = (typeof THEME_PALETTE_STEPS)[number]
 
-export type ThemeScopeType = "root" | "dashboard" | "document" | "panel" | "widget"
+export type ThemeScopeType =
+  | "root"
+  | "dashboard"
+  | "document"
+  | "panel"
+  | "widget"
 
 export interface ThemeRecord {
   id: string

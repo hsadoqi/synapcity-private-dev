@@ -82,15 +82,11 @@ function roundByte(value: number) {
 }
 
 function linearToSrgb(value: number) {
-  return value >= 0.0031308
-    ? 1.055 * value ** (1 / 2.4) - 0.055
-    : 12.92 * value
+  return value >= 0.0031308 ? 1.055 * value ** (1 / 2.4) - 0.055 : 12.92 * value
 }
 
 function srgbToLinear(value: number) {
-  return value >= 0.04045
-    ? ((value + 0.055) / 1.055) ** 2.4
-    : value / 12.92
+  return value >= 0.04045 ? ((value + 0.055) / 1.055) ** 2.4 : value / 12.92
 }
 
 function numberToHex(value: number) {
@@ -104,7 +100,9 @@ function numberToHex(value: number) {
 export function parseOklch(value: string): OklchColor | null {
   const match = value
     .trim()
-    .match(/^oklch\(\s*([+-]?(?:\d+\.?\d*|\.\d+)%?)\s+([+-]?(?:\d+\.?\d*|\.\d+))\s+([+-]?(?:\d+\.?\d*|\.\d+))(?:\s*\/\s*[^)]+)?\s*\)$/i)
+    .match(
+      /^oklch\(\s*([+-]?(?:\d+\.?\d*|\.\d+)%?)\s+([+-]?(?:\d+\.?\d*|\.\d+))\s+([+-]?(?:\d+\.?\d*|\.\d+))(?:\s*\/\s*[^)]+)?\s*\)$/i
+    )
 
   if (!match) {
     return null
@@ -246,7 +244,10 @@ function maxChromaForLightness(lightness: number) {
   return clamp(0.34 * Math.sin(Math.PI * lightness) ** 0.72, 0.012, 0.34)
 }
 
-function deriveScaleColor(seed: OklchColor, step: ThemePaletteStep): OklchColor {
+function deriveScaleColor(
+  seed: OklchColor,
+  step: ThemePaletteStep
+): OklchColor {
   const seedInfluence = clamp((seed.l - 0.63) * 0.08, -0.025, 0.025)
   const l = clamp(LIGHTNESS_BY_STEP[step] + seedInfluence, 0.02, 0.995)
   const drift = HUE_DRIFT_BY_STEP[step]

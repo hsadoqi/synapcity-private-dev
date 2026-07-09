@@ -127,7 +127,8 @@ export function setThemeAssignment(input: {
     scopeType: input.scopeType,
     scopeId: input.scopeId,
     themeId: input.themeId,
-    createdAt: assignments.find((item) => item.id === id)?.createdAt ?? timestamp,
+    createdAt:
+      assignments.find((item) => item.id === id)?.createdAt ?? timestamp,
     updatedAt: timestamp,
   }
 
@@ -150,7 +151,10 @@ export function saveThemeAssignment(assignment: ThemeAssignment) {
   })
 }
 
-export function removeThemeAssignment(scopeType: ThemeScopeType, scopeId: string) {
+export function removeThemeAssignment(
+  scopeType: ThemeScopeType,
+  scopeId: string
+) {
   const id = `${scopeType}:${scopeId}`
   const nextAssignments = readAssignmentsFromStorage().filter(
     (assignment) => assignment.id !== id
@@ -177,6 +181,7 @@ export function getAssignedTheme(
   }
 
   return (
-    readThemesFromStorage().find((theme) => theme.id === assignment.themeId) ?? null
+    readThemesFromStorage().find((theme) => theme.id === assignment.themeId) ??
+    null
   )
 }

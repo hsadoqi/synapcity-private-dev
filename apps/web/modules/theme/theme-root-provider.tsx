@@ -10,10 +10,7 @@ import {
   type ThemeRecord,
 } from "./types"
 
-function getRootTheme(
-  themes: ThemeRecord[],
-  assignments: ThemeAssignment[]
-) {
+function getRootTheme(themes: ThemeRecord[], assignments: ThemeAssignment[]) {
   const rootAssignment = assignments.find(
     (assignment) =>
       assignment.scopeType === "root" && assignment.scopeId === "app"
@@ -59,8 +56,6 @@ export function ThemeRootProvider({ children }: { children: React.ReactNode }) {
   useDocumentRootTheme(theme, isAssigned)
 
   return (
-    <div className="min-h-svh bg-background text-foreground">
-      {children}
-    </div>
+    <div className="min-h-svh bg-background text-foreground">{children}</div>
   )
 }
