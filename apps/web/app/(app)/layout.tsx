@@ -1,6 +1,5 @@
 import Link from "next/link"
-
-import { ThemeScopeProvider, DEFAULT_THEME_RECORD } from "@/modules/theme"
+import { AppProviders } from "./app-providers"
 
 const navigation = [
   { href: "/", label: "Home" },
@@ -11,12 +10,7 @@ const navigation = [
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ThemeScopeProvider
-      scopeType="root"
-      scopeId="app"
-      theme={DEFAULT_THEME_RECORD}
-      className="min-h-svh bg-background text-foreground"
-    >
+    <AppProviders>
       <div className="min-h-svh bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.12),transparent_40%)]">
         <header className="border-b border-border/70 bg-background/80 backdrop-blur">
           <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
@@ -45,6 +39,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           {children}
         </main>
       </div>
-    </ThemeScopeProvider>
+    </AppProviders>
   )
 }
