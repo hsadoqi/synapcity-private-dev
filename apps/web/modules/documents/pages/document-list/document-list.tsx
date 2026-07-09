@@ -1,5 +1,7 @@
 import Link from "next/link"
 
+import { documentListStyles } from "./document-list.styles"
+
 const sampleDocuments = [
   { id: "doc-1", title: "Product vision", slug: "product-vision" },
   { id: "doc-2", title: "Design principles", slug: "design-principles" },
@@ -7,23 +9,21 @@ const sampleDocuments = [
 
 export function DocumentListPage() {
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm text-muted-foreground">Documents</p>
-          <h1 className="text-3xl font-semibold tracking-tight">Document library</h1>
-        </div>
+    <div className={documentListStyles.page}>
+      <div className={documentListStyles.heading}>
+        <p className="text-sm text-muted-foreground">Documents</p>
+        <h1 className={documentListStyles.title}>Document library</h1>
       </div>
 
-      <div className="grid gap-3">
+      <div className={documentListStyles.list}>
         {sampleDocuments.map((document) => (
           <Link
             key={document.id}
             href={`/documents/${document.id}`}
-            className="rounded-lg border border-border bg-card p-4 text-left shadow-sm transition hover:border-primary"
+            className={documentListStyles.card}
           >
-            <div className="font-medium">{document.title}</div>
-            <div className="mt-1 text-sm text-muted-foreground">/{document.slug}</div>
+            <div className={documentListStyles.cardTitle}>{document.title}</div>
+            <div className={documentListStyles.cardMeta}>/{document.slug}</div>
           </Link>
         ))}
       </div>
