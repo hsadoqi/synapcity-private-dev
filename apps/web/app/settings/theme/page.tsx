@@ -78,6 +78,8 @@ export default function ThemeSettingsPage() {
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_360px]">
         <ThemeScopeProvider
+          scopeType="root"
+          scopeId="theme-preview"
           theme={activeTheme}
           className="rounded-xl border border-border bg-card p-6 shadow-sm"
         >
@@ -161,7 +163,7 @@ export default function ThemeSettingsPage() {
             onClick={handleSaveTheme}
             className="w-full rounded-full border border-border px-3 py-2 text-sm transition hover:border-primary"
           >
-            Save theme preset
+            Create theme preset
           </button>
 
           <div className="rounded-lg border border-border bg-background p-3 text-sm text-muted-foreground">

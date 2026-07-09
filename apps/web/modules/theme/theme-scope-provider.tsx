@@ -3,16 +3,20 @@
 import * as React from "react"
 
 import { buildThemeVariables } from "./theme-engine"
-import { DEFAULT_THEME_RECORD, type ThemeRecord } from "./types"
+import { type ThemeRecord } from "./types"
 
 interface ThemeScopeProviderProps {
-  theme?: ThemeRecord
+  scopeType?: string
+  scopeId?: string
+  theme?: ThemeRecord | null
   children: React.ReactNode
   className?: string
 }
 
 export function ThemeScopeProvider({
-  theme = DEFAULT_THEME_RECORD,
+  scopeType = "root",
+  scopeId = "app",
+  theme,
   children,
   className,
 }: ThemeScopeProviderProps) {
@@ -20,15 +24,26 @@ export function ThemeScopeProvider({
 
   React.useEffect(() => {
     const target = containerRef.current ?? document.documentElement
-    const cssVars = buildThemeVariables(theme.primaryOklch, theme.accentOklch)
 
-    Object.entries(cssVars).forEach(([name, value]) => {
-      target.style.setProperty(name, value)
-    })
+    if (theme) {
+      const cssVars = buildThemeVariables(theme.primaryOklch, theme.accentOklch)
+      Object.entries(cssVars).forEach(([name, value]) => {
+        target.style.setProperty(name, value)
+      })
+    }
   }, [theme])
 
+  const isExplicitTheme = Boolean(theme)
+
   return (
-    <div ref={containerRef} className={className}>
+    <div
+      ref={containerRef}
+      className={className}
+      data-theme-scope={scopeType}
+      data-theme-scope-id={scopeId}
+      data-theme-source={isExplicitTheme ? "explicit" : "inherited"}
+      data-theme-id={isExplicitTheme && theme ? theme.id : undefined}
+    >
       {children}
     </div>
   )
