@@ -9,30 +9,64 @@ import { ThemeSwatch } from "./theme-swatch"
 
 type PaletteScalePreviewProps = {
   label: string
+  description?: string
   seed: string
-  onSeedChange: (seed: string) => void
+  variablePrefix: "--primary" | "--accent"
+  onSeedChange?: (seed: string) => void
+  readOnly?: boolean
+  compact?: boolean
 }
 
 export function PaletteScalePreview({
   label,
+  description,
   seed,
+  variablePrefix,
   onSeedChange,
+  readOnly = false,
+  compact = false,
 }: PaletteScalePreviewProps) {
   const palette = useMemo(() => generatePalette(seed), [seed])
 
   return (
-    <section className="space-y-3">
-      <div className="flex gap-2">
-        <ColorPicker color={seed} onChange={onSeedChange} />
-        <div className="space-y-2">
+    <section className="min-w-0 space-y-3">
+      <div className="flex min-w-0 items-start gap-3">
+        {!readOnly && onSeedChange ? (
+          <ColorPicker color={seed} onChange={onSeedChange} />
+        ) : (
+          <span
+            aria-hidden="true"
+            className="mt-0.5 size-8 shrink-0 rounded-md border"
+            style={{ backgroundColor: seed }}
+          />
+        )}
+        <div className="min-w-0 space-y-1">
           <h3 className="text-sm font-medium text-foreground">{label}</h3>
-          <p className="text-xs text-muted-foreground">Seed: {seed}</p>
+          {description ? (
+            <p className="text-xs leading-5 text-muted-foreground">
+              {description}
+            </p>
+          ) : null}
+          <p className="break-all font-mono text-[11px] text-muted-foreground">
+            Seed: {seed}
+          </p>
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-4">
+      <div
+        className={
+          compact
+            ? "grid grid-cols-4 gap-2 min-[420px]:grid-cols-6 sm:grid-cols-6"
+            : "grid grid-cols-4 gap-2 min-[420px]:grid-cols-6 md:grid-cols-11"
+        }
+      >
         {PALETTE_STEPS.map((step) => (
-          <ThemeSwatch key={step} step={step} value={palette[step]} />
+          <ThemeSwatch
+            key={step}
+            step={step}
+            value={palette[step]}
+            variableName={`${variablePrefix}-${step}`}
+          />
         ))}
       </div>
     </section>

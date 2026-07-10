@@ -9,27 +9,31 @@ import type { PaletteStep } from "../types"
 type ThemeSwatchProps = {
   step: PaletteStep
   value: string
+  variableName: string
 }
 
-export function ThemeSwatch({ step, value }: ThemeSwatchProps) {
+export function ThemeSwatch({ step, value, variableName }: ThemeSwatchProps) {
   const labelColor = getStepLabelColor(value)
 
   return (
     <Tooltip>
       <TooltipTrigger
-        aria-label={`Palette step ${step}: ${value}`}
-        className="relative size-12 min-w-0 overflow-hidden rounded-lg border bg-card"
+        aria-label={`${variableName}: ${value}`}
+        className="group relative h-16 min-w-0 overflow-hidden rounded-md border bg-card text-left focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
       >
         <span className="absolute inset-0" style={{ background: value }} />
         <span
-          className="relative flex size-full items-center justify-center text-base font-medium"
+          className="relative flex size-full flex-col justify-between p-1.5 text-[10px] font-medium"
           style={{ color: labelColor }}
         >
-          {step}
+          <span>{step}</span>
+          <span className="truncate font-mono opacity-80">{variableName}</span>
         </span>
       </TooltipTrigger>
       <TooltipContent>
-        <span className="truncate font-semibold">{value}</span>
+        <span className="font-mono text-xs">
+          {variableName}: {value}
+        </span>
       </TooltipContent>
     </Tooltip>
   )

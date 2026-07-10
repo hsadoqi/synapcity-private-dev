@@ -15,12 +15,12 @@ type ColorPickerProps = {
 export function ColorPicker({ color, onChange }: ColorPickerProps) {
   const popoverRef = React.useRef<HTMLDivElement | null>(null)
   const [isOpen, setIsOpen] = React.useState(false)
-const [textDraft, setTextDraft] = React.useState(() => ({
-  sourceColor: color,
-  value: color,
-}))
+  const [textDraft, setTextDraft] = React.useState(() => ({
+    sourceColor: color,
+    value: color,
+  }))
 
-const textInput = textDraft.sourceColor === color ? textDraft.value : color
+  const textInput = textDraft.sourceColor === color ? textDraft.value : color
 
   const close = React.useCallback(() => {
     setIsOpen(false)
@@ -57,15 +57,16 @@ const textInput = textDraft.sourceColor === color ? textDraft.value : color
       <button
         type="button"
         aria-label="Open color picker"
-        className="h-8 w-8 cursor-pointer rounded border border-border hover:shadow-sm"
+        aria-expanded={isOpen}
+        className="size-9 cursor-pointer rounded-md border border-border ring-offset-background transition hover:border-foreground/30 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
         style={{ backgroundColor: color }}
-        onClick={() => setIsOpen(true)}
+        onClick={() => setIsOpen((current) => !current)}
       />
 
       {isOpen && (
         <div
           ref={popoverRef}
-          className="absolute top-full left-0 z-50 mt-2 rounded-sm border border-border bg-popover p-3 shadow-sm"
+          className="absolute top-full left-0 z-50 mt-2 w-64 rounded-lg border border-border bg-popover p-3 shadow-md"
         >
           <RgbaColorPicker color={rgbaColor} onChange={handlePickerChange} />
           <label className="mt-3 block space-y-1.5">
@@ -73,7 +74,8 @@ const textInput = textDraft.sourceColor === color ? textDraft.value : color
               OKLCH seed
             </span>
             <input
-              className="h-10 w-full rounded-md border bg-background px-3 font-mono text-sm"
+              aria-invalid={!textInputIsValid}
+              className="h-9 w-full rounded-md border bg-background px-2.5 font-mono text-xs outline-none focus-visible:ring-1 focus-visible:ring-ring aria-invalid:border-destructive aria-invalid:ring-1 aria-invalid:ring-destructive/25"
               value={textInput}
               onChange={(event) =>
                 setTextDraft({
@@ -95,7 +97,9 @@ const textInput = textDraft.sourceColor === color ? textDraft.value : color
               }}
             />
             {!textInputIsValid ? (
-              <p className="text-xs text-destructive">Use valid OKLCH.</p>
+              <p className="text-xs text-destructive">
+                Enter OKLCH like oklch(0.62 0.14 48).
+              </p>
             ) : null}
           </label>
         </div>
