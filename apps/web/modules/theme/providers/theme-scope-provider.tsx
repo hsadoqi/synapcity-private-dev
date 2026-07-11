@@ -2,8 +2,9 @@
 
 import * as React from "react"
 
-import { buildThemeVariables } from "./theme-engine"
-import { type ThemeRecord } from "./types"
+import { buildThemeVariables } from "../theme-engine"
+import { type ThemeRecord } from "../types"
+import { cn } from "@workspace/ui/lib/utils"
 
 interface ThemeScopeProviderProps {
   scopeType?: string
@@ -38,7 +39,7 @@ export function ThemeScopeProvider({
   return (
     <div
       ref={containerRef}
-      className={className}
+      className={cn("flex flex-1")}
       data-theme-scope={scopeType}
       data-theme-scope-id={scopeId}
       data-theme-source={isExplicitTheme ? "explicit" : "inherited"}

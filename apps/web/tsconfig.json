@@ -3,7 +3,10 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./*"],
-      "@workspace/ui/*": ["../../packages/ui/src/*"]
+      "@workspace/ui/*": ["../../packages/ui/src/*"],
+      "@workspace/types": ["../../packages/types/src/index.ts"],
+      "@workspace/feedback": ["../../packages/feedback/src/index.ts"],
+      "@workspace/feedback/*": ["../../packages/feedback/src/*"]
     },
     "plugins": [
       {
@@ -19,6 +22,6 @@
     "**/*.mts",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
-  ],
+],
   "exclude": ["node_modules"]
 }

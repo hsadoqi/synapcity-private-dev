@@ -1,36 +1,11 @@
-export interface DashboardRecord {
-  id: string
-  title: string
-  slug: string
-  description?: string | null
-  version: number
-  createdAt: string
-  updatedAt: string
-  deletedAt?: string | null
-}
-
-export interface DashboardLayoutItem {
-  widgetInstanceId: string
-  x: number
-  y: number
-  w: number
-  h: number
-}
-
-export interface DashboardLayout {
-  dashboardId: string
-  breakpoint: "lg" | "md" | "sm" | "xs"
-  items: DashboardLayoutItem[]
-}
-
-export interface WidgetInstance {
-  id: string
-  dashboardId: string
-  widgetType: string
-  title?: string | null
-  config: Record<string, unknown>
-  sourceType?: "document" | null
-  sourceId?: string | null
-  createdAt: string
-  updatedAt: string
-}
+// Re-exported from the shared package. WidgetInstance in particular used
+// to be defined here AND in modules/widgets/types.ts — now both re-export
+// the single definition in packages/types/src/widgets.ts. Edit the actual
+// shapes in packages/types/src/{dashboards,widgets}.ts (source of truth is
+// synapcity-theme; synced to other forks via scripts/sync-shared-packages.sh).
+export type {
+  DashboardRecord,
+  DashboardLayoutItem,
+  DashboardLayout,
+  WidgetInstance,
+} from "@workspace/types"
