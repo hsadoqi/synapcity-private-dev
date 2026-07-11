@@ -3,7 +3,6 @@
 import * as React from "react"
 
 import { DocumentEditorShell } from "./components/document-editor-shell"
-import { DocumentMetadataPanel } from "./components/document-metadata-panel"
 import { documentDetailStyles } from "./document-detail.styles"
 import { loadDocumentById } from "@/modules/documents/services/document-data"
 interface DocumentDetailPageProps {
@@ -31,7 +30,6 @@ export function DocumentDetailPage({ documentId }: DocumentDetailPageProps) {
           initialDocument={document}
         />
       </div>
-      <DocumentMetadataPanel documentId={documentId} document={document} />
     </div>
   )
 }

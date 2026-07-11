@@ -29,7 +29,7 @@ export const APP_NAV_ITEMS: AppNavItem[] = [
   { href: "/", label: "Home", section: "home" },
   { href: "/documents", label: "Documents", section: "documents" },
   { href: "/dashboards", label: "Dashboards", section: "dashboards" },
-  { href: "/settings/theme", label: "Theme", section: "theme-settings" },
+  { href: "/settings/themes", label: "Themes", section: "theme-settings" },
 ]
 
 function decodeRouteSegment(value: string | undefined) {
@@ -89,12 +89,12 @@ export function getAppRouteContext(pathname: string): AppRouteContext {
     }
   }
 
-  if (segments[0] === "settings" && segments[1] === "theme") {
+  if (segments[0] === "settings" && segments[1] === "themes") {
     return {
       pathname: normalizedPathname,
       section: "theme-settings",
-      title: "Theme settings",
-      description: "Global and scoped design tokens",
+      title: "Themes",
+      description: "Reusable visual systems",
       navItems: APP_NAV_ITEMS,
     }
   }

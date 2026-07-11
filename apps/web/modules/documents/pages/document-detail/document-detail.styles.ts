@@ -1,5 +1,5 @@
 export const documentDetailStyles = {
-  layout: "grid gap-6 lg:grid-cols-[minmax(0,2fr)_320px]",
+  layout: "flex min-w-0 flex-col",
   content: "space-y-6",
   heading: "space-y-1",
   eyebrow: "text-sm text-muted-foreground",

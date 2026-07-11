@@ -9,15 +9,14 @@ import { loadDashboardById } from "@/modules/dashboards/services/dashboard-data"
 import {
   createDashboardWidget,
   createLayoutItem,
+  getDashboardLayoutServerSnapshot,
+  getDashboardWidgetsServerSnapshot,
   loadDashboardLayout,
   loadDashboardWidgets,
   saveDashboardLayout,
   saveDashboardWidgets,
+  subscribeDashboardLayoutStorage,
 } from "@/modules/dashboards/services/dashboard-layout-data"
-import type {
-  DashboardLayout,
-  WidgetInstance,
-} from "@/modules/dashboards/types"
 
 interface DashboardDetailPageProps {
   dashboardId: string
@@ -31,11 +30,15 @@ export function DashboardDetailPage({ dashboardId }: DashboardDetailPageProps) {
 
   const [isEditing, setIsEditing] = React.useState(false)
   const [selectedWidget, setSelectedWidget] = React.useState("document-card")
-  const [widgets, setWidgets] = React.useState<WidgetInstance[]>(() =>
-    loadDashboardWidgets(dashboardId)
+  const widgets = React.useSyncExternalStore(
+    subscribeDashboardLayoutStorage,
+    () => loadDashboardWidgets(dashboardId),
+    () => getDashboardWidgetsServerSnapshot(dashboardId)
   )
-  const [layout, setLayout] = React.useState<DashboardLayout>(() =>
-    loadDashboardLayout(dashboardId)
+  const layout = React.useSyncExternalStore(
+    subscribeDashboardLayoutStorage,
+    () => loadDashboardLayout(dashboardId),
+    () => getDashboardLayoutServerSnapshot(dashboardId)
   )
 
   const handleAddWidget = (widgetType: string) => {
@@ -50,8 +53,6 @@ export function DashboardDetailPage({ dashboardId }: DashboardDetailPageProps) {
       createLayoutItem(nextWidget.id, layout.items.length),
     ]
 
-    setWidgets(nextWidgets)
-    setLayout({ ...layout, items: nextLayoutItems })
     saveDashboardWidgets(dashboardId, nextWidgets)
     saveDashboardLayout(dashboardId, { ...layout, items: nextLayoutItems })
   }
