@@ -34,6 +34,7 @@ const sidebarUser = {
  */
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const ref = React.useRef<HTMLDivElement | null>(null)
+  const [searchQuery, setSearchQuery] = React.useState("")
   const pathname = usePathname()
   const routeContext = getAppRouteContext(pathname)
   const activeSection =
@@ -77,7 +78,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             },
           ]}
         />
-        {open ? <SidebarSearch /> : null}
+        {open ? <SidebarSearch onSearchChange={setSearchQuery} /> : null}
       </SidebarHeader>
       <SidebarContent>
         <SidebarPrimaryNavigation
@@ -89,6 +90,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarWorkspaceItems
           activeSection={activeSection}
           items={activeItems}
+          searchQuery={searchQuery}
         />
       </SidebarContent>
       <SidebarFooter>

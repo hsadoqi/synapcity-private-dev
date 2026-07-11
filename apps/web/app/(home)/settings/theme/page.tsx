@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Palette } from "lucide-react"
+import { Palette, Loader2 } from "lucide-react"
 
 import {
   ThemeScopeProvider,
@@ -13,11 +13,13 @@ import {
   type ThemeAssignment,
   type ThemeRecord,
 } from "@/modules/theme"
-import { EmptyState } from "@workspace/ui/components"
+import { EmptyState, Button } from "@workspace/ui/components"
+import { useToast } from "@workspace/feedback"
 
 const paletteSteps = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950]
 
 export default function ThemeSettingsPage() {
+  const toast = useToast()
   const [themes, setThemes] = React.useState<ThemeRecord[]>(() => loadThemes())
   const [assignments, setAssignments] = React.useState<ThemeAssignment[]>(() =>
     loadThemeAssignments()
@@ -32,29 +34,39 @@ export default function ThemeSettingsPage() {
   const [accentOklch, setAccentOklch] = React.useState(
     DEFAULT_THEME_RECORD.accentOklch
   )
+  const [isCreating, setIsCreating] = React.useState(false)
+  const [createError, setCreateError] = React.useState<string>()
 
   const activeTheme =
     themes.find((theme) => theme.id === selectedThemeId) ??
     themes[0] ??
     DEFAULT_THEME_RECORD
 
-  const handleSaveTheme = () => {
-    const nextTheme: ThemeRecord = {
-      id: `theme-${Date.now()}`,
-      name,
-      primaryOklch,
-      accentOklch,
-      mode: "system",
-      version: 1,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+  const handleSaveTheme = async () => {
+    if (isCreating || !name.trim()) {
+      return
     }
 
-    const nextThemes = saveTheme(nextTheme)
-    setThemes(nextThemes)
-    setSelectedThemeId(nextTheme.id)
-    setAssignments(
-      saveThemeAssignment({
+    setIsCreating(true)
+    setCreateError(undefined)
+
+    try {
+      const nextTheme: ThemeRecord = {
+        id: `theme-${Date.now()}`,
+        name,
+        primaryOklch,
+        accentOklch,
+        mode: "system",
+        version: 1,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }
+
+      const nextThemes = saveTheme(nextTheme)
+      setThemes(nextThemes)
+      setSelectedThemeId(nextTheme.id)
+
+      const nextAssignments = saveThemeAssignment({
         id: `assignment-${Date.now()}`,
         scopeType: "root",
         scopeId: "app",
@@ -62,7 +74,22 @@ export default function ThemeSettingsPage() {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       })
-    )
+      setAssignments(nextAssignments)
+
+      toast.success(`Theme "${name}" created and applied`, {
+        duration: 3000,
+      })
+
+      setName("New theme")
+      setPrimaryOklch(DEFAULT_THEME_RECORD.primaryOklch)
+      setAccentOklch(DEFAULT_THEME_RECORD.accentOklch)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to create theme"
+      setCreateError(message)
+      toast.error(`Failed to create theme: ${message}`)
+    } finally {
+      setIsCreating(false)
+    }
   }
 
   return (
@@ -160,13 +187,31 @@ export default function ThemeSettingsPage() {
             />
           </label>
 
-          <button
+          {createError && (
+            <div
+              role="alert"
+              className="rounded-lg border border-destructive/50 bg-destructive/5 p-3 text-xs text-destructive"
+            >
+              {createError}
+            </div>
+          )}
+
+          <Button
             type="button"
             onClick={handleSaveTheme}
-            className="w-full rounded-full border border-border px-3 py-2 text-sm transition hover:border-primary"
+            disabled={isCreating || !name.trim()}
+            aria-busy={isCreating}
+            className="w-full"
           >
-            Create theme preset
-          </button>
+            {isCreating ? (
+              <>
+                <Loader2 className="size-3 animate-spin" />
+                Creating…
+              </>
+            ) : (
+              "Create theme preset"
+            )}
+          </Button>
 
           <div className="rounded-lg border border-border bg-background p-3 text-sm text-muted-foreground">
             <div className="font-medium text-foreground">Assignments</div>

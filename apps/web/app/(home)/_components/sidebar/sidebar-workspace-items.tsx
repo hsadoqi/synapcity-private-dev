@@ -21,14 +21,23 @@ import type { SidebarWorkspaceItem } from "./use-sidebar-workspace-items"
 type SidebarWorkspaceItemsProps = {
   activeSection: "Dashboards" | "Documents" | "Theme"
   items: SidebarWorkspaceItem[]
+  searchQuery?: string
 }
 
 export function SidebarWorkspaceItems({
   activeSection,
   items,
+  searchQuery = "",
 }: SidebarWorkspaceItemsProps) {
   const pathname = usePathname()
   const { open } = useSidebar()
+
+  const filteredItems = searchQuery.trim()
+    ? items.filter((item) =>
+        item.label.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : items
+
   const sectionTitle =
     activeSection === "Dashboards"
       ? "Dashboards"
@@ -39,6 +48,8 @@ export function SidebarWorkspaceItems({
     activeSection === "Theme"
       ? "No theme-specific sidebar items yet."
       : `No ${sectionTitle.toLowerCase()} items yet.`
+  const noResultsCopy = `No ${sectionTitle.toLowerCase()} match "${searchQuery}"`
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>
@@ -55,15 +66,15 @@ export function SidebarWorkspaceItems({
         </span>
       </SidebarGroupLabel>
       <SidebarGroupContent>
-        {(items.length === 0 && open) ? (
+        {(filteredItems.length === 0 && open) ? (
           <p className="px-2 py-1 text-sm text-sidebar-foreground/60">
-            {emptyStateCopy}
+            {searchQuery && items.length > 0 ? noResultsCopy : emptyStateCopy}
           </p>
         ) : (
           <SidebarMenu>
             <div className="flex flex-1 flex-col">
               <div className="flex flex-col gap-2">
-                {items.map((item, index) => (
+                {filteredItems.map((item, index) => (
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton
                       asChild
@@ -81,7 +92,7 @@ export function SidebarWorkspaceItems({
                         </span>
                       </Link>
                     </SidebarMenuButton>
-                    {index < items.length - 1 ? <SidebarSeparator /> : null}
+                    {index < filteredItems.length - 1 ? <SidebarSeparator /> : null}
                   </SidebarMenuItem>
                 ))}
               </div>
