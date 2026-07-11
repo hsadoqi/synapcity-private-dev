@@ -21,10 +21,10 @@ import {
 } from "@workspace/ui/components/primitives/sidebar"
 import { ChevronsUpDownIcon, PlusIcon } from "lucide-react"
 
-export function DomainSwitcher({
-  domains,
+export function SectionSwitcher({
+  sections,
 }: {
-  domains: {
+  sections: {
     name: string
     logo: React.ReactNode
     href: string
@@ -32,9 +32,11 @@ export function DomainSwitcher({
 }) {
   const { isMobile, state } = useSidebar()
   const pathname = usePathname()
-  const activeTeam = domains.find(
-    (domain) => pathname === domain.href || pathname.startsWith(`${domain.href}/`)
-  ) ?? domains[0]
+  const activeTeam =
+    sections.find(
+      (section) =>
+        pathname === section.href || pathname.startsWith(`${section.href}/`)
+    ) ?? sections[0]
 
   if (!activeTeam) {
     return null
@@ -49,18 +51,19 @@ export function DomainSwitcher({
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <div className="flex aspect-square size-6 items-center justify-center
-              bg-sidebar-primary text-sidebar-primary-foreground">
+              <div className="flex aspect-square size-6 items-center justify-center bg-sidebar-primary text-sidebar-primary-foreground">
                 {activeTeam.logo}
               </div>
               <div className="grid flex-1 text-left leading-tight">
-                <span className="truncate font-medium text-sm">{activeTeam.name}</span>
+                <span className="truncate text-sm font-medium">
+                  {activeTeam.name}
+                </span>
               </div>
               <ChevronsUpDownIcon className="ml-auto" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-fit py-2 px-1"
+            className="w-fit px-1 py-2"
             align="start"
             side={isMobile ? "bottom" : "right"}
             sideOffset={6}
@@ -68,19 +71,18 @@ export function DomainSwitcher({
             <DropdownMenuLabel className="text-xs text-muted-foreground">
               Domains
             </DropdownMenuLabel>
-            {domains.map((domain, index) => (
-              <DropdownMenuItem
-                key={domain.name}
-                className="gap-2"
-                asChild
-              >
-                <Link href={domain.href} aria-current={domain === activeTeam ? "page" : undefined}>
+            {sections.map((section, index) => (
+              <DropdownMenuItem key={section.name} className="gap-2" asChild>
+                <Link
+                  href={section.href}
+                  aria-current={section === activeTeam ? "page" : undefined}
+                >
                   <div className="flex size-6 items-center justify-center rounded-md border">
-                    {domain.logo}
+                    {section.logo}
                   </div>
-                  {domain.name}
+                  {section.name}
                   <DropdownMenuShortcut>
-                    <kbd className="bg-muted-foreground text-muted px-1">
+                    <kbd className="bg-muted-foreground px-1 text-muted">
                       ⌘{index + 1}
                     </kbd>
                   </DropdownMenuShortcut>
@@ -92,7 +94,9 @@ export function DomainSwitcher({
               <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
                 <PlusIcon className="size-4" />
               </div>
-              <div className="font-medium text-muted-foreground">Add domain</div>
+              <div className="font-medium text-muted-foreground">
+                Add section
+              </div>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

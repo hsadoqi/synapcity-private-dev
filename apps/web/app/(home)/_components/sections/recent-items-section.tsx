@@ -1,22 +1,24 @@
 export type RecentItem = {
-    href: string;
-    title: string;
-    description?: string;
+  href: string
+  title: string
+  description?: string
 }
 
-export const RecentItemsSection = ({ items = [] }: { items?: RecentItem[] }) => {
-    if (items.length === 0) {
-        return (
-            <div className="rounded-lg border border-border bg-card p-8">
-                <h2 className="mb-4 text-sm font-semibold text-foreground">
-                    Recent Items
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                    No recent items yet. Create your first document or dashboard to get
-                    started.
-                </p>
-            </div>
-        )
-    }
-    return null;
+export const RecentItemsSection = ({
+  items = [],
+}: {
+  items?: RecentItem[]
+}) => {
+  if (items.length === 0) {
+    return (
+      <section className="border-t pt-6">
+        <h2 className="text-sm font-medium text-foreground">Recent Items</h2>
+        <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
+          No recent items yet. Create your first document or dashboard to get
+          started.
+        </p>
+      </section>
+    )
+  }
+  return null
 }

@@ -1,72 +1,91 @@
-import {
-  FileText,
-  LayoutDashboard,
-  LayoutGrid,
-  Notebook,
-} from "lucide-react"
-import { Button } from "@workspace/ui/components"
+import { FileText, LayoutDashboard, LayoutGrid, Notebook } from "lucide-react"
 import Link from "next/link"
 
-export type QuickAction = {
-  action: string
-  href?: string
+import { Button } from "@workspace/ui/components"
+
+export type QuickActionItem = {
+  title: string
+  href: string
   icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>
   description?: string
-  onClick?: () => void
 }
 
-const quickActions: QuickAction[] = [
+type QuickActionCardProps = {
+  item: QuickActionItem
+}
+
+const quickActions: QuickActionItem[] = [
   {
-    href: "/documents/new",
+    href: "/documents",
     icon: FileText,
-    action: "New Document",
-    description: "Create a blank document",
+    title: "New Document",
+    description: "Open the document workspace to create a new document",
   },
   {
-    href: "/dashboards/new",
+    href: "/dashboards",
     icon: LayoutDashboard,
-    action: "New Dashboard",
-    description: "Compose a new dashboard",
+    title: "New Dashboard",
+    description: "Open the dashboard workspace to create a new dashboard",
   },
   {
     href: "/documents",
     icon: Notebook,
-    action: "Browse Documents",
+    title: "Browse Documents",
     description: "View collection of documents",
   },
   {
     href: "/dashboards",
     icon: LayoutGrid,
-    action: "Browse Dashboards",
+    title: "Browse Dashboards",
     description: "View collection of dashboards",
   },
 ]
 
-export const QuickActionsSection = ({actions=quickActions}: { actions?: QuickAction[]}) => {
+function QuickActionCard({ item }: QuickActionCardProps) {
+  const Icon = item.icon
+
   return (
-    <section className="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-3">
-      {actions.map((action) => {
-        const Icon = action.icon
-        return (
-          <Link key={action.href} href={action.href ?? "#"}>
-            <Button
-              variant="outline"
-              className="h-auto w-full flex-col gap-3 p-6 hover:bg-secondary"
-              onClick={action.onClick}
-            >
-              {Icon && <Icon className="h-6 w-6 text-primary" />}
-              <div className="text-left">
-                <h3 className="text-sm font-semibold">{action.action}</h3>
-                {action.description && (
-                  <p className="mt-0.5 text-xs text-muted-foreground">
-                    {action.description}
-                  </p>
-                )}
-              </div>
-            </Button>
-          </Link>
-        )
-      })}
+    <Button
+      variant="outline"
+      className="h-full min-h-28 w-full items-start justify-start p-4 text-left hover:bg-muted"
+      asChild
+    >
+      <Link href={item.href}>
+        <div className="flex h-full w-full items-start gap-3">
+          {Icon ? (
+            <Icon
+              data-icon="inline-start"
+              className="mt-0.5 text-primary"
+              aria-hidden="true"
+            />
+          ) : null}
+          <div className="min-w-0">
+            <h3 className="text-sm font-medium">{item.title}</h3>
+            {item.description ? (
+              <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                {item.description}
+              </p>
+            ) : null}
+          </div>
+        </div>
+      </Link>
+    </Button>
+  )
+}
+
+export const QuickActionsSection = ({
+  actions = quickActions,
+}: {
+  actions?: QuickActionItem[]
+}) => {
+  return (
+    <section
+      aria-label="Quick actions"
+      className="mb-12 grid grid-cols-1 gap-3 @md/home:grid-cols-2 @4xl/home:grid-cols-4"
+    >
+      {actions.map((item) => (
+        <QuickActionCard key={`${item.href}-${item.title}`} item={item} />
+      ))}
     </section>
   )
 }

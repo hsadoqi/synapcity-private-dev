@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { Palette } from "lucide-react"
 
 import {
   ThemeScopeProvider,
@@ -12,6 +13,7 @@ import {
   type ThemeAssignment,
   type ThemeRecord,
 } from "@/modules/theme"
+import { EmptyState } from "@workspace/ui/components"
 
 const paletteSteps = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950]
 
@@ -64,7 +66,7 @@ export default function ThemeSettingsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex max-w-7xl flex-1 flex-col space-y-6 p-6">
       <div>
         <p className="text-sm text-muted-foreground">Theme</p>
         <h1 className="text-3xl font-semibold tracking-tight">
@@ -168,7 +170,16 @@ export default function ThemeSettingsPage() {
 
           <div className="rounded-lg border border-border bg-background p-3 text-sm text-muted-foreground">
             <div className="font-medium text-foreground">Assignments</div>
-            <div className="mt-2">{assignments.length} saved assignment(s)</div>
+            {assignments.length === 0 ? (
+              <EmptyState
+                icon={<Palette className="size-8" aria-hidden="true" />}
+                title="No saved assignments yet"
+                description="Assignments will appear here after a saved theme is applied to a scope."
+                className="py-6"
+              />
+            ) : (
+              <div className="mt-2">{assignments.length} saved assignment(s)</div>
+            )}
           </div>
         </div>
       </div>

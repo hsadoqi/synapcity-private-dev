@@ -1,7 +1,10 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
+import { LayoutDashboard } from "lucide-react"
 
+import { Button, ErrorState } from "@workspace/ui/components"
 import { DashboardCanvas } from "./components/dashboard-canvas"
 import { WidgetRenderer } from "./components/widget-renderer"
 import { dashboardDetailStyles } from "./dashboard-detail.styles"
@@ -24,18 +27,35 @@ interface DashboardDetailPageProps {
 }
 
 export function DashboardDetailPage({ dashboardId }: DashboardDetailPageProps) {
-const dashboard = React.useMemo(
-  () => loadDashboardById(dashboardId),
-  [dashboardId]
-)
+  const dashboardState = React.useMemo(() => {
+    try {
+      return {
+        dashboard: loadDashboardById(dashboardId),
+        layout: loadDashboardLayout(dashboardId),
+        status: "ready" as const,
+        widgets: loadDashboardWidgets(dashboardId),
+      }
+    } catch {
+      return {
+        dashboard: null,
+        layout: {
+          dashboardId,
+          breakpoint: "lg" as const,
+          items: [],
+        },
+        status: "error" as const,
+        widgets: [] as WidgetInstance[],
+      }
+    }
+  }, [dashboardId])
 
   const [isEditing, setIsEditing] = React.useState(false)
   const [selectedWidget, setSelectedWidget] = React.useState("document-card")
-  const [widgets, setWidgets] = React.useState<WidgetInstance[]>(() =>
-    loadDashboardWidgets(dashboardId)
+  const [widgets, setWidgets] = React.useState<WidgetInstance[]>(
+    dashboardState.widgets
   )
-  const [layout, setLayout] = React.useState<DashboardLayout>(() =>
-    loadDashboardLayout(dashboardId)
+  const [layout, setLayout] = React.useState<DashboardLayout>(
+    dashboardState.layout
   )
 
   const handleAddWidget = (widgetType: string) => {
@@ -56,12 +76,45 @@ const dashboard = React.useMemo(
     saveDashboardLayout(dashboardId, { ...layout, items: nextLayoutItems })
   }
 
+  if (dashboardState.status === "error") {
+    return (
+      <div className="flex flex-1 items-center justify-center p-6 md:p-12">
+        <ErrorState
+          title="Couldn’t load this dashboard"
+          description="The dashboard data could not be read from local storage."
+          action={
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/dashboards">Back to dashboards</Link>
+            </Button>
+          }
+        />
+      </div>
+    )
+  }
+
+  if (!dashboardState.dashboard) {
+    return (
+      <div className="flex flex-1 items-center justify-center p-6 md:p-12">
+        <ErrorState
+          icon={<LayoutDashboard className="size-10" aria-hidden="true" />}
+          title="Dashboard not found"
+          description="This dashboard no longer exists in local storage."
+          action={
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/dashboards">Back to dashboards</Link>
+            </Button>
+          }
+        />
+      </div>
+    )
+  }
+
   return (
     <div className={dashboardDetailStyles.page}>
       <div className={dashboardDetailStyles.heading}>
         <p className={dashboardDetailStyles.eyebrow}>Dashboard</p>
         <h1 className={dashboardDetailStyles.title}>
-          {dashboard?.title ?? `Dashboard ${dashboardId}`}
+          {dashboardState.dashboard.title}
         </h1>
         <p className={dashboardDetailStyles.description}>
           Edit mode now persists widget additions and layout slots for the

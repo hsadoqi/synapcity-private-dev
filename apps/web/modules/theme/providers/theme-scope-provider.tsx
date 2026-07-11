@@ -24,12 +24,13 @@ export function ThemeScopeProvider({
   const containerRef = React.useRef<HTMLDivElement>(null)
 
   React.useEffect(() => {
-    const target = containerRef.current ?? document.documentElement
+    const target = containerRef.current
 
     if (theme) {
       const cssVars = buildThemeVariables(theme.primaryOklch, theme.accentOklch)
+
       Object.entries(cssVars).forEach(([name, value]) => {
-        target.style.setProperty(name, value)
+        target?.style.setProperty(name, value)
       })
     }
   }, [theme])
@@ -39,7 +40,7 @@ export function ThemeScopeProvider({
   return (
     <div
       ref={containerRef}
-      className={cn("flex flex-1")}
+      className={cn("flex flex-1", className)}
       data-theme-scope={scopeType}
       data-theme-scope-id={scopeId}
       data-theme-source={isExplicitTheme ? "explicit" : "inherited"}

@@ -3,7 +3,7 @@
 import * as React from "react"
 import { ClientThemeProvider, useTheme } from "@wrksz/themes/client"
 
-function ThemeProvider({
+function RootThemeProvider({
   children,
   ...props
 }: React.ComponentProps<typeof ClientThemeProvider>) {
@@ -68,4 +68,4 @@ function ThemeHotkey() {
   return null
 }
 
-export { ThemeProvider }
+export { RootThemeProvider }
