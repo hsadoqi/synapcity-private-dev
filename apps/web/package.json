@@ -8,11 +8,15 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "typecheck": "tsc --noEmit",
-    "clean": "rm -rf .next node_modules package-lock.json pnpm-lock.yaml yarn.lock & pnpm install"
+    "clean": "rm -rf .next node_modules package-lock.json pnpm-lock.yaml yarn-lock.yaml & pnpm install"
   },
   "dependencies": {
+    "@workspace/feedback": "workspace:*",
+    "@workspace/types": "workspace:*",
     "@workspace/ui": "workspace:*",
     "culori": "^4.0.2",
     "lucide-react": "^1.23.0",
@@ -24,6 +28,8 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
     "@types/culori": "^4.0.1",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -31,6 +37,8 @@
     "@workspace/eslint-config": "workspace:^",
     "@workspace/typescript-config": "workspace:*",
     "eslint": "^9",
-    "typescript": "^5"
+    "jsdom": "^26.1.0",
+    "typescript": "^5",
+    "vitest": "^3.2.4"
   }
 }

@@ -1,5 +1,5 @@
-import { ThemeSettingsPage } from "@/modules/theme"
+import { redirect } from "next/navigation"
 
 export default function Page() {
-  return <ThemeSettingsPage />
+  redirect("/settings/themes")
 }

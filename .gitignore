@@ -49,3 +49,4 @@ docs/*
 !docs/routing.md
 .archives
 .codex
+.gstack/

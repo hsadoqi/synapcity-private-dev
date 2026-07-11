@@ -2,7 +2,7 @@ import Link from "next/link"
 
 export default function RootPage() {
   return (
-    <div className="space-y-6">
+    <div className="h-full w-full space-y-6">
       <div className="space-y-2">
         <p className="text-sm text-muted-foreground">Phase 0</p>
         <h1 className="text-3xl font-semibold tracking-tight">
@@ -27,9 +27,9 @@ export default function RootPage() {
             description: "Dashboard list and composition placeholder",
           },
           {
-            href: "/settings/theme",
-            label: "Theme",
-            description: "Scoped theme and runtime palette preview",
+            href: "/settings/themes",
+            label: "Themes",
+            description: "Reusable visual systems and assignments",
           },
         ].map((item) => (
           <Link

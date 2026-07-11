@@ -26,14 +26,14 @@ export default function RootLayout({
       lang="en"
       suppressHydrationWarning
       className={cn(
-        "antialiased",
+        "light min-h-full w-full scroll-smooth antialiased",
         fontMono.variable,
         "font-sans",
         inter.variable,
         spaceGroteskHeading.variable
       )}
     >
-      <body className="min-h-screen bg-background font-sans text-foreground antialiased">
+      <body className="flex min-h-full w-full flex-auto flex-col bg-background font-sans text-foreground antialiased">
         <RootProviders>{children}</RootProviders>
       </body>
     </html>
