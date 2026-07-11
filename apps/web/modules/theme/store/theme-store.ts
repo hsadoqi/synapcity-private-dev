@@ -17,7 +17,6 @@ import type { ThemeAssignment, ThemeRecord, ThemeScope } from "../types"
 type ThemeState = {
   themes: ThemeRecord[]
   assignments: ThemeAssignment[]
-  activeThemeId: string
 }
 
 type ThemeAssignmentInput = {
@@ -36,11 +35,36 @@ type ThemeSnapshot = ThemeState
 const DEFAULT_THEME_STATE: ThemeState = {
   themes: [DEFAULT_THEME_RECORD],
   assignments: [],
-  activeThemeId: DEFAULT_THEME_RECORD.id,
 }
 
-function createThemeStore(initialState: ThemeState = DEFAULT_THEME_STATE) {
-  let state: ThemeState = initialState
+type ThemeStoreStorage = {
+  loadThemes: () => ThemeRecord[]
+  loadAssignments: () => ThemeAssignment[]
+  saveTheme: (theme: ThemeRecord) => ThemeRecord[]
+  deleteTheme: (themeId: string) => ThemeRecord[]
+  persistAssignments: (assignments: ThemeAssignment[]) => void
+  setAssignment: (input: ThemeAssignmentInput) => ThemeAssignment[]
+  removeAssignment: (
+    input: ThemeAssignmentRemovalInput
+  ) => ThemeAssignment[]
+}
+
+const browserStorage: ThemeStoreStorage = {
+  loadThemes,
+  loadAssignments: loadThemeAssignments,
+  saveTheme: saveStoredTheme,
+  deleteTheme: deleteStoredTheme,
+  persistAssignments: persistThemeAssignments,
+  setAssignment: setStoredThemeAssignment,
+  removeAssignment: removeStoredThemeAssignment,
+}
+
+export function createThemeStore(options?: {
+  initialState?: ThemeState
+  storage?: ThemeStoreStorage
+}) {
+  const storage = options?.storage ?? browserStorage
+  let state: ThemeState = options?.initialState ?? DEFAULT_THEME_STATE
   let snapshot: ThemeSnapshot = state
   let hydrated = false
 
@@ -54,14 +78,12 @@ function createThemeStore(initialState: ThemeState = DEFAULT_THEME_STATE) {
   const ensureHydrated = () => {
     if (hydrated || typeof window === "undefined") return
 
-    const themes = loadThemes()
-    const assignments = loadThemeAssignments()
-    const hasActiveTheme = themes.some((theme) => theme.id === state.activeThemeId)
+    const themes = storage.loadThemes()
+    const assignments = storage.loadAssignments()
 
     state = {
       themes,
       assignments,
-      activeThemeId: hasActiveTheme ? state.activeThemeId : DEFAULT_THEME_RECORD.id,
     }
     snapshot = state
     hydrated = true
@@ -103,39 +125,39 @@ function createThemeStore(initialState: ThemeState = DEFAULT_THEME_STATE) {
 
     saveTheme(theme: ThemeRecord) {
       ensureHydrated()
-      const themes = saveStoredTheme(theme)
+      const themes = storage.saveTheme(theme)
       state = {
         ...state,
         themes,
-        activeThemeId: theme.id,
       }
       emit()
     },
 
     deleteTheme(themeId: string) {
       ensureHydrated()
-      const themes = deleteStoredTheme(themeId)
-      const assignments = state.assignments.filter(
-        (assignment) => assignment.themeId !== themeId,
+      const isAssigned = state.assignments.some(
+        (assignment) => assignment.themeId === themeId
       )
+      if (isAssigned) {
+        throw new Error(`Theme is assigned: ${themeId}`)
+      }
 
-      persistThemeAssignments(assignments)
+      const themes = storage.deleteTheme(themeId)
 
       state = {
         ...state,
         themes,
-        assignments,
-        activeThemeId:
-          state.activeThemeId === themeId
-            ? DEFAULT_THEME_RECORD.id
-            : state.activeThemeId,
       }
       emit()
     },
 
     setAssignment(input: ThemeAssignmentInput) {
       ensureHydrated()
-      const assignments = setStoredThemeAssignment(input)
+      if (!state.themes.some((theme) => theme.id === input.themeId)) {
+        throw new Error(`Cannot assign missing theme: ${input.themeId}`)
+      }
+
+      const assignments = storage.setAssignment(input)
       state = {
         ...state,
         assignments,
@@ -145,7 +167,7 @@ function createThemeStore(initialState: ThemeState = DEFAULT_THEME_STATE) {
 
     removeAssignment(input: ThemeAssignmentRemovalInput) {
       ensureHydrated()
-      const assignments = removeStoredThemeAssignment(input)
+      const assignments = storage.removeAssignment(input)
       state = {
         ...state,
         assignments,
@@ -161,6 +183,6 @@ export function useThemeSnapshot() {
   return React.useSyncExternalStore(
     themeStore.subscribe,
     themeStore.getSnapshot,
-    themeStore.getServerSnapshot,
+    themeStore.getServerSnapshot
   )
 }

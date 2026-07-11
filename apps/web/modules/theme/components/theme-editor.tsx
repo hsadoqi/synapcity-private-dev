@@ -2,7 +2,7 @@
 
 import * as React from "react"
 
-import { DEFAULT_THEME_RECORD } from "../constants"
+import { DEFAULT_NEUTRAL_ACCENT, DEFAULT_THEME_RECORD } from "../constants"
 import { isValidOklch, normalizeOklch } from "../engine/oklch"
 import { DEFAULT_THEME_FONTS, getThemeFontOptions } from "../font-registry"
 import { useThemes } from "../hooks/use-themes"
@@ -30,7 +30,8 @@ export function ThemeEditor({
   const [draft, setDraft] = React.useState<ThemeRecord>(selectedTheme)
 
   const primaryIsValid = isValidOklch(draft.seeds.primary)
-  const accentIsValid = isValidOklch(draft.seeds.accent)
+  const accentIsValid =
+    draft.seeds.accent === undefined || isValidOklch(draft.seeds.accent)
   const radiusBase =
     draft.radius?.base ?? DEFAULT_THEME_RECORD.radius?.base ?? 0.75
   const typeScale =
@@ -68,7 +69,11 @@ export function ThemeEditor({
     updateDraft({
       radius: {
         ...draft.radius,
-        base: clamp(roundToStep(nextValue, RADIUS_STEP), RADIUS_MIN, RADIUS_MAX),
+        base: clamp(
+          roundToStep(nextValue, RADIUS_STEP),
+          RADIUS_MIN,
+          RADIUS_MAX
+        ),
       },
     })
   }
@@ -205,7 +210,9 @@ export function ThemeEditor({
                 <input
                   className="h-9 w-full rounded-md border bg-background px-2.5 text-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   value={draft.name}
-                  onChange={(event) => updateDraft({ name: event.target.value })}
+                  onChange={(event) =>
+                    updateDraft({ name: event.target.value })
+                  }
                 />
               </label>
 
@@ -271,7 +278,7 @@ export function ThemeEditor({
             <div className="border-t p-5">
               <SeedInput
                 label="Accent OKLCH"
-                value={draft.seeds.accent}
+                value={draft.seeds.accent ?? DEFAULT_NEUTRAL_ACCENT}
                 isValid={accentIsValid}
                 onChange={(accent) =>
                   updateDraft({ seeds: { ...draft.seeds, accent } })
@@ -281,7 +288,7 @@ export function ThemeEditor({
                 <PaletteScalePreview
                   label="Generated accent scale"
                   description="Use this for small emphasis moments and status-adjacent UI."
-                  seed={draft.seeds.accent}
+                  seed={draft.seeds.accent ?? DEFAULT_NEUTRAL_ACCENT}
                   variablePrefix="--accent"
                   onSeedChange={(accent) =>
                     updateDraft({ seeds: { ...draft.seeds, accent } })
@@ -550,7 +557,9 @@ function StepperControl({
         </button>
         <output className="flex min-w-0 items-center justify-center px-3 font-mono text-xs">
           {formattedValue}
-          {suffix ? <span className="ml-1 text-muted-foreground">{suffix}</span> : null}
+          {suffix ? (
+            <span className="ml-1 text-muted-foreground">{suffix}</span>
+          ) : null}
         </output>
         <button
           type="button"
@@ -570,13 +579,18 @@ function StepperControl({
 }
 
 function normalizeThemeDraft(theme: ThemeRecord): ThemeRecord {
+  const seeds =
+    theme.seeds.accent === undefined
+      ? { primary: normalizeOklch(theme.seeds.primary) }
+      : {
+          primary: normalizeOklch(theme.seeds.primary),
+          accent: normalizeOklch(theme.seeds.accent),
+        }
+
   return {
     ...theme,
     name: theme.name.trim(),
-    seeds: {
-      primary: normalizeOklch(theme.seeds.primary),
-      accent: normalizeOklch(theme.seeds.accent),
-    },
+    seeds,
     updatedAt: new Date().toISOString(),
   }
 }

@@ -47,7 +47,7 @@ export function PaletteScalePreview({
               {description}
             </p>
           ) : null}
-          <p className="break-all font-mono text-[11px] text-muted-foreground">
+          <p className="font-mono text-[11px] break-all text-muted-foreground">
             Seed: {seed}
           </p>
         </div>

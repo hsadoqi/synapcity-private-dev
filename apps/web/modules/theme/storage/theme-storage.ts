@@ -25,8 +25,17 @@ function normalizeThemeRecord(theme: ThemeRecord): ThemeRecord {
     ? theme.fonts.heading
     : DEFAULT_THEME_FONTS.heading
 
+  const seeds =
+    theme.seeds.accent === undefined
+      ? { primary: theme.seeds.primary }
+      : { primary: theme.seeds.primary, accent: theme.seeds.accent }
+
   return {
-    ...theme,
+    id: theme.id,
+    name: theme.name,
+    description: theme.description,
+    version: 1,
+    seeds,
     radius: {
       ...theme.radius,
       base: normalizeNumber(
@@ -45,6 +54,8 @@ function normalizeThemeRecord(theme: ThemeRecord): ThemeRecord {
       body: bodyFont,
       heading: headingFont,
     },
+    createdAt: theme.createdAt,
+    updatedAt: theme.updatedAt,
   }
 }
 

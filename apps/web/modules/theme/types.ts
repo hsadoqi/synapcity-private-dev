@@ -16,9 +16,8 @@ export type ThemeRecord = {
   version: 1
   seeds: {
     primary: string
-    accent: string
+    accent?: string
   }
-  mode?: ThemeMode
   radius?: {
     base?: number
   }
@@ -28,6 +27,14 @@ export type ThemeRecord = {
   fonts?: ThemeFonts
   createdAt: string
   updatedAt: string
+}
+
+export type ThemeDraft = Omit<ThemeRecord, "createdAt" | "updatedAt">
+
+export type ResolvedThemeSeeds = {
+  primary: string
+  accent: string
+  accentSource: "authored" | "neutral-default"
 }
 
 export type ThemeAssignment = {

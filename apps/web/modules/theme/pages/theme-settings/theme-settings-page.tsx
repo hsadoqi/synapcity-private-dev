@@ -2,7 +2,10 @@
 
 import * as React from "react"
 
-import { DEFAULT_THEME_RECORD } from "../../constants"
+import {
+  DEFAULT_NEUTRAL_ACCENT,
+  DEFAULT_THEME_RECORD,
+} from "../../constants"
 import { useThemes } from "../../hooks/use-themes"
 import { ThemeAssignmentPanel } from "../../components/theme-assignment-panel"
 import { ThemeEditor } from "../../components/theme-editor"
@@ -35,7 +38,9 @@ export function ThemeSettingsPage() {
         </div>
         <div className="rounded-lg border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
           Root app theme:{" "}
-          <span className="font-medium text-foreground">explicit assignment</span>
+          <span className="font-medium text-foreground">
+            explicit assignment
+          </span>
         </div>
       </header>
 
@@ -79,7 +84,7 @@ export function ThemeSettingsPage() {
                 <PaletteScalePreview
                   label="Accent generated scale"
                   description="Secondary emphasis only. It should support the primary scale."
-                  seed={selectedTheme.seeds.accent}
+                  seed={selectedTheme.seeds.accent ?? DEFAULT_NEUTRAL_ACCENT}
                   variablePrefix="--accent"
                   readOnly
                   compact

@@ -10,6 +10,8 @@ export const PALETTE_STEPS = [
   50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950,
 ] as const
 
+export const DEFAULT_NEUTRAL_ACCENT = "oklch(0.62 0 0)"
+
 export const DEFAULT_THEME_RECORD: ThemeRecord = {
   id: "theme-warm-ledger",
   name: "Warm Ledger",
@@ -19,7 +21,6 @@ export const DEFAULT_THEME_RECORD: ThemeRecord = {
     primary: "oklch(0.58 0.12 72)",
     accent: "oklch(0.62 0.14 48)",
   },
-  mode: "system",
   radius: {
     base: 0.75,
   },

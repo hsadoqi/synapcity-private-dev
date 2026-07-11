@@ -2,17 +2,19 @@ import type * as React from "react"
 
 import { DEFAULT_THEME_RECORD } from "../constants"
 import { DEFAULT_THEME_FONTS, resolveThemeFontValue } from "../font-registry"
-import type { ThemeCssVars, ThemeRecord } from "../types"
+import type { ThemeCssVars, ThemeDraft, ThemeRecord } from "../types"
 import { generatePalette } from "./generate-palette"
+import { resolveThemeSeeds } from "./resolve-theme-seeds"
 
 function toRem(value: number | undefined, fallback: number) {
   const next = value ?? fallback
   return `${next}rem`
 }
 
-export function buildThemeVars(theme: ThemeRecord): ThemeCssVars {
-  const primary = generatePalette(theme.seeds.primary)
-  const accent = generatePalette(theme.seeds.accent)
+export function buildThemeVars(theme: ThemeRecord | ThemeDraft): ThemeCssVars {
+  const seeds = resolveThemeSeeds(theme.seeds)
+  const primary = generatePalette(seeds.primary)
+  const accent = generatePalette(seeds.accent)
   const radiusBase = DEFAULT_THEME_RECORD.radius?.base ?? 0.75
   const typeScale =
     theme.typography?.scale ?? DEFAULT_THEME_RECORD.typography?.scale ?? 1

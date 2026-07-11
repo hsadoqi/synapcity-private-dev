@@ -12,8 +12,7 @@ export function resolveThemeAssignment(input: {
   scopeId: string
 }): ThemeResolution {
   const assignment = input.assignments.find(
-    (item) =>
-      item.scope === input.scope && item.scopeId === input.scopeId
+    (item) => item.scope === input.scope && item.scopeId === input.scopeId
   )
 
   if (!assignment) {

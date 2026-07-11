@@ -32,8 +32,9 @@ export function ThemeAssignmentPanel({
         </p>
         <h2 className="text-sm font-medium text-foreground">{scopeLabel}</h2>
         <p className="text-xs leading-5 text-muted-foreground">
-          Apply a saved theme record to {scope === "global" ? "the app root" : "this scope"}.
-          Removing the assignment lets CSS inheritance take over.
+          Apply a saved theme record to{" "}
+          {scope === "global" ? "the app root" : "this scope"}. Removing the
+          assignment lets CSS inheritance take over.
         </p>
       </div>
 

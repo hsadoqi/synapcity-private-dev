@@ -23,21 +23,38 @@ export function ThemeModeProvider({ children }: ThemeRootProviderProps) {
 
 export function ThemeRootProvider({ children }: ThemeRootProviderProps) {
   const resolution = useResolvedTheme(ROOT_THEME_SCOPE, ROOT_THEME_SCOPE_ID)
-  const theme = resolution.theme
+  const appliedKeysRef = React.useRef<string[]>([])
 
   React.useEffect(() => {
     const root = document.documentElement
-    const vars = buildThemeVars(theme)
 
-    for (const [key, value] of Object.entries(vars)) {
-      root.style.setProperty(key, value)
+    for (const key of appliedKeysRef.current) {
+      root.style.removeProperty(key)
     }
+    appliedKeysRef.current = []
 
     root.dataset.themeScope = ROOT_THEME_SCOPE
     root.dataset.themeScopeId = ROOT_THEME_SCOPE_ID
-    root.dataset.themeId = theme.id
     root.dataset.themeResolution = resolution.status
-  }, [theme, resolution.status])
+
+    if (resolution.status === "assigned") {
+      const vars = buildThemeVars(resolution.theme)
+      for (const [key, value] of Object.entries(vars)) {
+        root.style.setProperty(key, value)
+      }
+      appliedKeysRef.current = Object.keys(vars)
+      root.dataset.themeId = resolution.theme.id
+    } else {
+      delete root.dataset.themeId
+    }
+
+    return () => {
+      for (const key of appliedKeysRef.current) {
+        root.style.removeProperty(key)
+      }
+      appliedKeysRef.current = []
+    }
+  }, [resolution])
 
   return <ThemeModeProvider>{children}</ThemeModeProvider>
 }
