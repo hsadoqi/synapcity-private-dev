@@ -70,7 +70,7 @@
   --secondary-foreground: var(--neutral-900);
 
   --muted: var(--neutral-100);
-  --muted-foreground: var(--neutral-500);
+  --muted-foreground: var(--neutral-800);
 
   --accent: var(--accent-100);
   --accent-foreground: var(--accent-900);
@@ -120,7 +120,7 @@
   --secondary-foreground: var(--neutral-100);
 
   --muted: var(--neutral-900);
-  --muted-foreground: var(--neutral-500);
+  --muted-foreground: var(--neutral-200);
 
   --accent: var(--accent-900);
   --accent-foreground: var(--accent-100);

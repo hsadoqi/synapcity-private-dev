@@ -62,4 +62,9 @@ function Button({
   )
 }
 
-export { Button, buttonVariants }
+
+type ButtonVariant = VariantProps<(typeof buttonVariants)>["variant"];
+type ButtonSize = VariantProps<(typeof buttonVariants)>["size"];
+type ButtonProps = VariantProps<(typeof buttonVariants)>;
+
+export { Button, buttonVariants, type ButtonVariant, type ButtonSize, type ButtonProps }
