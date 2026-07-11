@@ -1,0 +1,40 @@
+{
+  "name": "@workspace/feedback",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./toast": "./src/toast/index.ts",
+    "./modal": "./src/modal/index.ts"
+  },
+  "dependencies": {
+    "lucide-react": "^1.23.0",
+    "zustand": "^5.0.9"
+  },
+  "peerDependencies": {
+    "react": "^19",
+    "@workspace/ui": "workspace:*"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@workspace/eslint-config": "workspace:*",
+    "@workspace/typescript-config": "workspace:*",
+    "@workspace/ui": "workspace:*",
+    "eslint": "^9",
+    "jsdom": "^26.1.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "typescript": "^5",
+    "vitest": "^3.2.4"
+  }
+}
