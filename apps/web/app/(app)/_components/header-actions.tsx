@@ -168,6 +168,14 @@ export function AppContextToolbar({
 }: {
   routeContext: AppRouteContext
 }) {
+  const isThemeBuilder =
+    routeContext.pathname.startsWith("/settings/themes/") &&
+    routeContext.pathname !== "/settings/themes"
+
+  if (isThemeBuilder) {
+    return null
+  }
+
   if (routeContext.section === "home" || routeContext.section === "unknown") {
     return null
   }

@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synapcity Theme Builder – Design Variants</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f5f5f5;
+            padding: 24px;
+            line-height: 1.5;
+        }
+
+        .container { max-width: 1600px; margin: 0 auto; }
+
+        .header {
+            margin-bottom: 32px;
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1a1a1a;
+        }
+
+        .header p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 12px;
+        }
+
+        .toggle-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .toggle-btn {
+            padding: 8px 16px;
+            border: 1px solid #ccc;
+            background: white;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .toggle-btn.active {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+
+        .toggle-btn:hover:not(.active) {
+            background: #f9f9f9;
+        }
+
+        .variants-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 32px;
+        }
+
+        .variant {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            display: none;
+        }
+
+        .variant.active {
+            display: block;
+        }
+
+        .variant-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .variant-description {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .mockup {
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .annotations {
+            background: #fafafa;
+            padding: 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .annotations h4 {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1a1a1a;
+        }
+
+        .annotations ul {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .annotations li {
+            margin-bottom: 6px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .annotations li:before {
+            content: "•";
+            position: absolute;
+            left: 8px;
+        }
+
+        .tradeoffs {
+            background: #f0f7ff;
+            padding: 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            line-height: 1.6;
+            margin-top: 16px;
+            border-left: 3px solid #2563eb;
+        }
+
+        .tradeoffs h4 {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1e40af;
+        }
+
+        .recommendation {
+            background: #f0fdf4;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 3px solid #10b981;
+            margin-top: 32px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .recommendation h3 {
+            color: #047857;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        /* SVG-based mockup styling */
+        .builder-frame {
+            width: 100%;
+            height: 600px;
+            background: white;
+            display: flex;
+            flex-direction: column;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Synapcity Theme Builder – Visual Design Variants</h1>
+            <p>High-fidelity desktop interface for <code>/settings/themes/[themeId]</code></p>
+            <p style="margin-top: 12px; font-size: 13px;">
+                <strong>State:</strong> Editing saved theme "Graphite" • Colors section • Unsaved changes • Dark preview • No authored accent
+            </p>
+            <div class="toggle-group">
+                <button class="toggle-btn active" onclick="switchVariant('neutral')">Neutral Technical</button>
+                <button class="toggle-btn" onclick="switchVariant('editorial')">Editorial Instrument</button>
+                <button class="toggle-btn" onclick="switchVariant('warm')">Warm Technical Ledger</button>
+            </div>
+        </div>
+
+        <div class="variants-grid">
+            <!-- VARIANT 1: NEUTRAL TECHNICAL -->
+            <div class="variant active" id="neutral">
+                <div class="variant-title">1. Neutral Technical</div>
+                <div class="variant-description">
+                    Crisp, restrained, precise. Inspired by Linear and Figma. Emphasizes clarity and hierarchy through weight and structure, not decoration. Cool neutral palette. Sharp edges. Clean 1px dividers. Maximum 8px radius. Monospace for technical values.
+                </div>
+
+                <div class="mockup" style="background: linear-gradient(135deg, #f9f9f9 0%, #ffffff 100%); padding: 0;">
+                    <svg viewBox="0 0 1440 600" style="width: 100%; height: 600px;">
+                        <!-- Command Bar -->
+                        <rect width="1440" height="56" fill="#fafafa" stroke="#e5e5e5" stroke-width="1"/>
+                        <text x="16" y="32" font-size="13" font-weight="500" fill="#0f766e">← Themes</text>
+                        <text x="100" y="32" font-size="16" font-weight="600" fill="#1a1a1a">Graphite</text>
+                        <text x="400" y="32" font-size="13" fill="#ea580c">Unsaved changes</text>
+
+                        <text x="1100" y="32" font-size="13" font-weight="500" fill="#1a1a1a">Revert</text>
+                        <rect x="1180" y="18" width="80" height="32" rx="4" fill="#2563eb" stroke="#2563eb" stroke-width="1"/>
+                        <text x="1220" y="38" font-size="13" font-weight="500" fill="white" text-anchor="middle">Save</text>
+                        <rect x="1270" y="18" width="32" height="32" rx="4" fill="#f3f4f6" stroke="#e5e5e5" stroke-width="1"/>
+                        <text x="1286" y="38" font-size="13" fill="#6b7280" text-anchor="middle">⋯</text>
+
+                        <!-- Divider -->
+                        <line x1="0" y1="56" x2="1440" y2="56" stroke="#e5e5e5" stroke-width="1"/>
+
+                        <!-- Section Rail -->
+                        <rect width="176" height="544" y="56" fill="#fafafa" stroke="#e5e5e5" stroke-width="1"/>
+                        <text x="12" y="82" font-size="13" font-weight="600" fill="#0f766e">Colors</text>
+                        <rect x="8" y="68" width="160" height="36" rx="4" fill="#e0f2fe"/>
+
+                        <text x="12" y="130" font-size="13" fill="#666">Typography</text>
+                        <text x="12" y="162" font-size="13" fill="#666">Shape</text>
+                        <text x="12" y="194" font-size="13" fill="#666">Accessibility</text>
+                        <text x="12" y="226" font-size="13" fill="#666">Advanced</text>
+
+                        <!-- Divider -->
+                        <line x1="176" y1="56" x2="176" y2="600" stroke="#e5e5e5" stroke-width="1"/>
+
+                        <!-- Preview Region -->
+                        <rect x="176" y="56" width="928" height="488" fill="#1f2937" stroke="#e5e5e5" stroke-width="1"/>
+
+                        <!-- Preview Toolbar -->
+                        <rect x="176" y="56" width="928" height="44" fill="#111827" stroke="#374151" stroke-width="1"/>
+                        <text x="196" y="80" font-size="12" fill="#e5e5e5">Document</text>
+                        <text x="320" y="80" font-size="12" fill="#e5e5e5">Light / </text>
+                        <circle cx="376" cy="78" r="8" fill="#3b82f6" stroke="white" stroke-width="1"/>
+                        <text x="395" y="80" font-size="12" fill="#e5e5e5">Dark / System</text>
+                        <text x="620" y="80" font-size="12" fill="#e5e5e5">Fit</text>
+                        <rect x="880" y="62" width="24" height="24" rx="4" fill="#374151"/>
+                        <text x="892" y="77" font-size="13" fill="#9ca3af" text-anchor="middle">⋯</text>
+
+                        <!-- Preview Canvas - Synapcity Document Mockup -->
+                        <rect x="200" y="120" width="880" height="380" fill="#0f172a" rx="2"/>
+
+                        <!-- Navbar in preview -->
+                        <rect x="200" y="120" width="880" height="40" fill="#1e293b"/>
+                        <circle cx="220" cy="140" r="4" fill="#64748b"/>
+                        <text x="240" y="143" font-size="11" fill="#cbd5e1">Research Board</text>
+
+                        <!-- Document title -->
+                        <text x="220" y="190" font-size="18" font-weight="600" fill="#e2e8f0">Market Analysis Q3</text>
+
+                        <!-- Prose content -->
+                        <line x1="220" y1="210" x2="900" y2="210" stroke="#475569" stroke-width="1"/>
+                        <text x="220" y="230" font-size="12" fill="#cbd5e1">The emerging competitive landscape has shifted substantially in favor</text>
+                        <text x="220" y="248" font-size="12" fill="#cbd5e1">of integrated solutions. Market research from Q2 indicates a 15% shift</text>
+                        <text x="220" y="266" font-size="12" fill="#cbd5e1">toward platforms that bundle analytics and reporting.</text>
+
+                        <!-- Link -->
+                        <text x="220" y="290" font-size="12" fill="#38bdf8" text-decoration="underline">Read competitive report →</text>
+
+                        <!-- Callout -->
+                        <rect x="220" y="310" width="680" height="48" fill="#1e293b" stroke="#334155" stroke-width="1" rx="2"/>
+                        <text x="235" y="325" font-size="11" fill="#f1f5f9">⚠</text>
+                        <text x="260" y="325" font-size="12" fill="#cbd5e1">Pricing adjustment required by end of month to remain</text>
+                        <text x="260" y="340" font-size="12" fill="#cbd5e1">competitive. See strategy document.</text>
+
+                        <!-- Metadata -->
+                        <text x="220" y="385" font-size="11" fill="#64748b">Updated 3h ago • 2,400 words • 12 comments</text>
+
+                        <!-- Action -->
+                        <rect x="220" y="400" width="100" height="32" fill="#0ea5e9" rx="2"/>
+                        <text x="270" y="420" font-size="12" fill="white" text-anchor="middle" font-weight="500">Add Comment</text>
+
+                        <!-- Data table -->
+                        <line x1="220" y1="445" x2="900" y2="445" stroke="#475569" stroke-width="1"/>
+                        <text x="220" y="465" font-size="11" fill="#94a3b8">Region</text>
+                        <text x="340" y="465" font-size="11" fill="#94a3b8">Q2 Revenue</text>
+                        <text x="520" y="465" font-size="11" fill="#94a3b8">Growth %</text>
+                        <text x="220" y="485" font-size="11" fill="#cbd5e1">North America</text>
+                        <text x="340" y="485" font-size="11" fill="#cbd5e1">$2.4M</text>
+                        <text x="520" y="485" font-size="11" fill="#10b981">+12%</text>
+
+                        <!-- Preview Status -->
+                        <text x="220" y="530" font-size="11" fill="#64748b">Previewing draft · Graphite · Dark</text>
+
+                        <!-- Divider -->
+                        <line x1="1104" y1="56" x2="1104" y2="600" stroke="#e5e5e5" stroke-width="1"/>
+
+                        <!-- Inspector -->
+                        <rect x="1104" y="56" width="336" height="544" fill="#fafafa" stroke="#e5e5e5" stroke-width="1"/>
+
+                        <!-- Inspector Header -->
+                        <text x="1120" y="78" font-size="14" font-weight="600" fill="#1a1a1a">Colors</text>
+                        <text x="1120" y="96" font-size="12" fill="#666">Edit primary and accent seeds</text>
+                        <line x1="1104" y1="108" x2="1440" y2="108" stroke="#e5e5e5" stroke-width="1"/>
+
+                        <!-- Primary Section -->
+                        <text x="1120" y="130" font-size="12" font-weight="600" fill="#1a1a1a">Primary</text>
+                        <rect x="1116" y="140" width="304" height="24" rx="3" fill="white" stroke="#d1d5db" stroke-width="1"/>
+                        <circle cx="1132" cy="152" r="8" fill="#6366f1"/>
+                        <text x="1160" y="155" font-size="12" fill="#1a1a1a">oklch(50% 0.2 310)</text>
+
+                        <!-- Color Scale -->
+                        <text x="1120" y="186" font-size="11" font-weight="500" fill="#666">Generated scale</text>
+                        <rect x="1116" y="195" width="15" height="12" fill="#110e2d"/>
+                        <rect x="1133" y="195" width="15" height="12" fill="#1a0d4d"/>
+                        <rect x="1150" y="195" width="15" height="12" fill="#241f7f"/>
+                        <rect x="1167" y="195" width="15" height="12" fill="#3730a3"/>
+                        <rect x="1184" y="195" width="15" height="12" fill="#4c1d95"/>
+                        <rect x="1201" y="195" width="15" height="12" fill="#6d28d9"/>
+                        <rect x="1218" y="195" width="15" height="12" fill="#7c3aed"/>
+                        <text x="1116" y="216" font-size="10" fill="#999">50</text>
+                        <text x="1200" y="216" font-size="10" fill="#999">950</text>
+
+                        <!-- Divider -->
+                        <line x1="1104" y1="232" x2="1440" y2="232" stroke="#e5e5e5" stroke-width="1"/>
+
+                        <!-- Accent Section -->
+                        <text x="1120" y="254" font-size="12" font-weight="600" fill="#1a1a1a">Accent</text>
+                        <text x="1120" y="272" font-size="12" fill="#666">Using neutral default</text>
+                        <rect x="1116" y="282" width="304" height="32" rx="3" fill="#f3f4f6" stroke="#e5e5e5" stroke-width="1"/>
+                        <text x="1128" y="303" font-size="12" fill="#2563eb" font-weight="500">+ Customize accent</text>
+
+                        <!-- Divider -->
+                        <line x1="1104" y1="324" x2="1440" y2="324" stroke="#e5e5e5" stroke-width="1"/>
+
+                        <!-- Semantic Mapping -->
+                        <text x="1120" y="346" font-size="12" font-weight="600" fill="#1a1a1a">Semantic roles</text>
+                        <text x="1120" y="365" font-size="11" fill="#666">Background, foreground, accent…</text>
+                        <text x="1128" y="385" font-size="11" fill="#2563eb" font-weight="500">Show all mappings</text>
+                    </svg>
+                </div>
+
+                <div class="annotations">
+                    <h4>Visual Decisions</h4>
+                    <ul>
+                        <li><strong>Command bar:</strong> Cool #fafafa with sharp action buttons. No rounded container around Save. Status in warning orange (#ea580c) for immediate legibility.</li>
+                        <li><strong>Section rail:</strong> Subtle light blue (#e0f2fe) for selected state. Text labels with no icon. Quiet neutral gray for unselected.</li>
+                        <li><strong>Preview:</strong> True isolation via dark background (#1f2937). Toolbar integrated into top edge. Status line sits below content.</li>
+                        <li><strong>Inspector:</strong> Generous white space. 1px semantic dividers between sections. Accent action rendered as a staged button (not filled).</li>
+                        <li><strong>Typography:</strong> Clean sans-serif (system stack). 13px for controls. 12px for secondary. 14px for section titles. Monospace for OKLCH only.</li>
+                    </ul>
+                </div>
+
+                <div class="tradeoffs">
+                    <h4>Trade-offs</h4>
+                    <ul>
+                        <li><strong>Clarity gain:</strong> Minimal visual noise maximizes content dominance. Every pixel serves function.</li>
+                        <li><strong>Warmth cost:</strong> Cool palette may feel clinical in extended use. Requires excellent contrast for approachability.</li>
+                        <li><strong>Familiarity:</strong> Linear/Figma users recognize this immediately. Reduces learning curve for power users.</li>
+                        <li><strong>Constraint:</strong> Limited decorative breathing room. Demands disciplined spacing and typography to avoid harshness.</li>
+                        <li><strong>Brand fit:</strong> Strong alignment with Synapcity's "technical, editorial, calm" positioning. Least decorative, most serious.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- VARIANT 2: EDITORIAL INSTRUMENT -->
+            <div class="variant" id="editorial">
+                <div class="variant-title">2. Editorial Instrument</div>
+                <div class="variant-description">
+                    Typographic and document-oriented. Stronger rhythm and generous spacing. Treats the builder as a serious editorial tool. Softer 10px radius. Warmer neutrals. Pronounced section separators. Ledger-like column alignment with more breathing room between groups.
+                </div>
+
+                <div class="mockup" style="background: linear-gradient(135deg, #fdfcfb 0%, #fefdfb 100%); padding: 0;">
+                    <svg viewBox="0 0 1440 600" style="width: 100%; height: 600px;">
+                        <!-- Command Bar -->
+                        <rect width="1440" height="56" fill="#fcfbf9" stroke="#e8e6e1" stroke-width="1"/>
+                        <text x="16" y="32" font-size="13" font-weight="400" fill="#78716b">← Themes</text>
+                        <text x="100" y="33" font-size="16" font-weight="700" fill="#1a1a1a">Graphite</text>
+                        <text x="400" y="32" font-size="13" fill="#b45309" font-weight="500">Unsaved changes</text>
+
+                        <text x="1100" y="32" font-size="13" fill="#78716b">Revert</text>
+                        <rect x="1180" y="18" width="80" height="32" rx="6" fill="#44403c" stroke="#44403c" stroke-width="1"/>
+                        <text x="1220" y="38" font-size="13" font-weight="500" fill="white" text-anchor="middle">Save</text>
+                        <rect x="1270" y="18" width="32" height="32" rx="6" fill="#f5f3f0" stroke="#e8e6e1" stroke-width="1"/>
+                        <text x="1286" y="38" font-size="13" fill="#78716b" text-anchor="middle">⋯</text>
+
+                        <!-- Divider -->
+                        <line x1="0" y1="56" x2="1440" y2="56" stroke="#e8e6e1" stroke-width="1"/>
+
+                        <!-- Section Rail -->
+                        <rect width="176" height="544" y="56" fill="#fefdfb" stroke="#e8e6e1" stroke-width="1"/>
+                        <text x="12" y="84" font-size="13" font-weight="700" fill="#44403c">Colors</text>
+                        <rect x="8" y="70" width="160" height="38" rx="6" fill="#f5e6d3" stroke="#e8dcc8" stroke-width="1"/>
+
+                        <text x="12" y="136" font-size="13" font-weight="500" fill="#78716b">Typography</text>
+                        <text x="12" y="170" font-size="13" font-weight="500" fill="#78716b">Shape</text>
+                        <text x="12" y="204" font-size="13" font-weight="500" fill="#78716b">Accessibility</text>
+                        <text x="12" y="238" font-size="13" font-weight="500" fill="#78716b">Advanced</text>
+
+                        <!-- Divider -->
+                        <line x1="176" y1="56" x2="176" y2="600" stroke="#e8e6e1" stroke-width="1"/>
+
+                        <!-- Preview Region -->
+                        <rect x="176" y="56" width="928" height="488" fill="#1a1a1a" stroke="#e8e6e1" stroke-width="1"/>
+
+                        <!-- Preview Toolbar -->
+                        <rect x="176" y="56" width="928" height="44" fill="#2d2d2d" stroke="#404040" stroke-width="1"/>
+                        <text x="196" y="80" font-size="12" fill="#e5e5e5" font-weight="500">Document</text>
+                        <text x="320" y="80" font-size="12" fill="#e5e5e5">Light / </text>
+                        <circle cx="376" cy="78" r="8" fill="#404040" stroke="#666" stroke-width="1"/>
+                        <text x="395" y="80" font-size="12" fill="#e5e5e5">Dark / System</text>
+                        <text x="620" y="80" font-size="12" fill="#e5e5e5">Fit</text>
+                        <rect x="880" y="62" width="24" height="24" rx="6" fill="#404040" stroke="#505050" stroke-width="1"/>
+                        <text x="892" y="77" font-size="13" fill="#999" text-anchor="middle">⋯</text>
+
+                        <!-- Preview Canvas -->
+                        <rect x="200" y="120" width="880" height="380" fill="#0f172a" rx="3"/>
+
+                        <!-- Navbar -->
+                        <rect x="200" y="120" width="880" height="40" fill="#1e293b" rx="2"/>
+                        <circle cx="220" cy="140" r="4" fill="#64748b"/>
+                        <text x="240" y="143" font-size="11" fill="#cbd5e1">Research Board</text>
+
+                        <!-- Document title -->
+                        <text x="220" y="192" font-size="18" font-weight="700" fill="#e2e8f0">Market Analysis Q3</text>
+
+                        <!-- Prose with more generous leading -->
+                        <line x1="220" y1="210" x2="900" y2="210" stroke="#475569" stroke-width="1"/>
+                        <text x="220" y="234" font-size="12" fill="#cbd5e1">The emerging competitive landscape has shifted substantially in favor</text>
+                        <text x="220" y="252" font-size="12" fill="#cbd5e1">of integrated solutions. Market research from Q2 indicates a 15% shift</text>
+                        <text x="220" y="270" font-size="12" fill="#cbd5e1">toward platforms that bundle analytics and reporting.</text>
+
+                        <!-- Link -->
+                        <text x="220" y="296" font-size="12" fill="#38bdf8">Read competitive report →</text>
+
+                        <!-- Callout -->
+                        <rect x="220" y="312" width="680" height="50" fill="#1e293b" stroke="#334155" stroke-width="1" rx="3"/>
+                        <text x="235" y="330" font-size="12" fill="#f1f5f9">⚠</text>
+                        <text x="260" y="330" font-size="12" fill="#cbd5e1">Pricing adjustment required by end of month to remain</text>
+                        <text x="260" y="348" font-size="12" fill="#cbd5e1">competitive. See strategy document.</text>
+
+                        <!-- Metadata -->
+                        <text x="220" y="390" font-size="11" fill="#64748b">Updated 3h ago • 2,400 words • 12 comments</text>
+
+                        <!-- Action -->
+                        <rect x="220" y="405" width="120" height="32" fill="#0ea5e9" rx="4"/>
+                        <text x="280" y="425" font-size="12" fill="white" text-anchor="middle" font-weight="500">Add Comment</text>
+
+                        <!-- Data table -->
+                        <line x1="220" y1="450" x2="900" y2="450" stroke="#475569" stroke-width="1"/>
+                        <text x="220" y="470" font-size="11" fill="#94a3b8">Region</text>
+                        <text x="340" y="470" font-size="11" fill="#94a3b8">Q2 Revenue</text>
+                        <text x="520" y="470" font-size="11" fill="#94a3b8">Growth %</text>
+                        <text x="220" y="490" font-size="11" fill="#cbd5e1">North America</text>
+                        <text x="340" y="490" font-size="11" fill="#cbd5e1">$2.4M</text>
+                        <text x="520" y="490" font-size="11" fill="#10b981">+12%</text>
+
+                        <!-- Preview Status -->
+                        <text x="220" y="535" font-size="11" fill="#64748b">Previewing draft · Graphite · Dark</text>
+
+                        <!-- Divider -->
+                        <line x1="1104" y1="56" x2="1104" y2="600" stroke="#e8e6e1" stroke-width="1"/>
+
+                        <!-- Inspector -->
+                        <rect x="1104" y="56" width="336" height="544" fill="#fefdfb" stroke="#e8e6e1" stroke-width="1"/>
+
+                        <!-- Inspector Header -->
+                        <text x="1120" y="80" font-size="14" font-weight="700" fill="#1a1a1a">Colors</text>
+                        <text x="1120" y="100" font-size="12" fill="#78716b" font-style="italic">Edit primary and accent seeds</text>
+                        <line x1="1104" y1="114" x2="1440" y2="114" stroke="#e8e6e1" stroke-width="2"/>
+
+                        <!-- Primary Section -->
+                        <text x="1120" y="138" font-size="12" font-weight="700" fill="#1a1a1a">Primary</text>
+                        <rect x="1116" y="150" width="304" height="28" rx="4" fill="white" stroke="#d1d5db" stroke-width="1"/>
+                        <circle cx="1132" cy="164" r="8" fill="#6366f1"/>
+                        <text x="1160" y="167" font-size="12" fill="#44403c">oklch(50% 0.2 310)</text>
+
+                        <!-- Color Scale -->
+                        <text x="1120" y="196" font-size="11" font-weight="600" fill="#78716b">Generated scale</text>
+                        <rect x="1116" y="206" width="16" height="14" fill="#110e2d" rx="1"/>
+                        <rect x="1134" y="206" width="16" height="14" fill="#1a0d4d" rx="1"/>
+                        <rect x="1152" y="206" width="16" height="14" fill="#241f7f" rx="1"/>
+                        <rect x="1170" y="206" width="16" height="14" fill="#3730a3" rx="1"/>
+                        <rect x="1188" y="206" width="16" height="14" fill="#4c1d95" rx="1"/>
+                        <rect x="1206" y="206" width="16" height="14" fill="#6d28d9" rx="1"/>
+                        <rect x="1224" y="206" width="16" height="14" fill="#7c3aed" rx="1"/>
+                        <text x="1116" y="230" font-size="10" fill="#999">50</text>
+                        <text x="1206" y="230" font-size="10" fill="#999">950</text>
+
+                        <!-- Divider -->
+                        <line x1="1104" y1="250" x2="1440" y2="250" stroke="#e8e6e1" stroke-width="2"/>
+
+                        <!-- Accent Section -->
+                        <text x="1120" y="274" font-size="12" font-weight="700" fill="#1a1a1a">Accent</text>
+                        <text x="1120" y="294" font-size="12" fill="#78716b">Using neutral default</text>
+                        <rect x="1116" y="306" width="304" height="38" rx="4" fill="#f5f3f0" stroke="#e8e6e1" stroke-width="1"/>
+                        <text x="1128" y="330" font-size="12" fill="#44403c" font-weight="600">+ Customize accent</text>
+
+                        <!-- Divider -->
+                        <line x1="1104" y1="352" x2="1440" y2="352" stroke="#e8e6e1" stroke-width="2"/>
+
+                        <!-- Semantic Mapping -->
+                        <text x="1120" y="376" font-size="12" font-weight="700" fill="#1a1a1a">Semantic roles</text>
+                        <text x="1120" y="396" font-size="11" fill="#78716b">Background, foreground, accent…</text>
+                        <text x="1128" y="418" font-size="11" fill="#44403c" font-weight="600">→ Show all mappings</text>
+                    </svg>
+                </div>
+
+                <div class="annotations">
+                    <h4>Visual Decisions</h4>
+                    <ul>
+                        <li><strong>Palette:</strong> Warm neutrals (#fcfbf9, #fefdfb) instead of stark white. Feels less sterile. Beige undertone without being dated.</li>
+                        <li><strong>Selected state:</strong> Warm beige (#f5e6d3) with softer border. More inviting than bright highlight. 10px radius for approachability.</li>
+                        <li><strong>Dividers:</strong> Heavier 2px separators in inspector create strong breathing room. Ledger-like section boundaries.</li>
+                        <li><strong>Typography:</strong> Bolder section titles (font-weight: 700). Secondary text in italic for subtle hierarchy. More generous leading (24px between sections).</li>
+                        <li><strong>Actions:</strong> Warmer dark button (#44403c) with 6px radius. "Show all mappings" uses arrow indicator. More editorial tone overall.</li>
+                    </ul>
+                </div>
+
+                <div class="tradeoffs">
+                    <h4>Trade-offs</h4>
+                    <ul>
+                        <li><strong>Warmth gain:</strong> More inviting and calming for extended use. Pairs well with Synapcity's "editorial" positioning.</li>
+                        <li><strong>Clarity cost:</strong> Slightly reduced contrast vs. pure neutrals. Requires careful color choices to maintain WCAG AA.</li>
+                        <li><strong>Density:</strong> Heavier dividers and generous spacing reduce information density. Takes slightly more vertical space.</li>
+                        <li><strong>Personality:</strong> Feels more like a tool for writers/editors than engineers. Strong brand character.</li>
+                        <li><strong>Implementation:</strong> Requires careful palette tuning. Warm neutrals can easily become dated or muddy if not precise.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- VARIANT 3: WARM TECHNICAL LEDGER -->
+            <div class="variant" id="warm">
+                <div class="variant-title">3. Warm Technical Ledger</div>
+                <div class="variant-description">
+                    Subtle warmth and material character without skeuomorphism. Soft edges (10px radius). Restrained elevation and soft shadows. Paper-like quality. Warm greys with carefully balanced accent. Combines technical precision with approachable material feel. Feels like a high-end tool, not a spreadsheet.
+                </div>
+
+                <div class="mockup" style="background: linear-gradient(135deg, #faf8f3 0%, #fefdfb 100%); padding: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                    <svg viewBox="0 0 1440 600" style="width: 100%; height: 600px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.04));">
+                        <!-- Command Bar -->
+                        <rect width="1440" height="56" fill="#fefdfb" stroke="#e5ddd0" stroke-width="1"/>
+                        <defs>
+                            <linearGradient id="saveGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:#6b5b45;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#5a4a35;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <text x="16" y="32" font-size="13" font-weight="400" fill="#9a8f7f">← Themes</text>
+                        <text x="100" y="33" font-size="16" font-weight="600" fill="#2a2420">Graphite</text>
+                        <text x="400" y="32" font-size="13" fill="#c97e16" font-weight="500">Unsaved changes</text>
+
+                        <text x="1100" y="32" font-size="13" fill="#9a8f7f">Revert</text>
+                        <rect x="1180" y="18" width="80" height="32" rx="8" fill="url(#saveGradient)" stroke="#6b5b45" stroke-width="1"/>
+                        <text x="1220" y="38" font-size="13" font-weight="500" fill="#fefdfb" text-anchor="middle">Save</text>
+                        <rect x="1270" y="18" width="32" height="32" rx="8" fill="#f3f1ed" stroke="#e5ddd0" stroke-width="1" style="filter: drop-shadow(0 1px 2px rgba(0,0,0,0.06))"/>
+                        <text x="1286" y="38" font-size="13" fill="#9a8f7f" text-anchor="middle">⋯</text>
+
+                        <!-- Divider -->
+                        <line x1="0" y1="56" x2="1440" y2="56" stroke="#e5ddd0" stroke-width="1"/>
+
+                        <!-- Section Rail -->
+                        <rect width="176" height="544" y="56" fill="#fefdfb" stroke="#e5ddd0" stroke-width="1"/>
+                        <text x="12" y="84" font-size="13" font-weight="600" fill="#2a2420">Colors</text>
+                        <rect x="8" y="70" width="160" height="38" rx="8" fill="#f1e8d9" stroke="#e5ddd0" stroke-width="1" style="filter: drop-shadow(0 1px 2px rgba(0,0,0,0.04))"/>
+
+                        <text x="12" y="136" font-size="13" font-weight="400" fill="#9a8f7f">Typography</text>
+                        <text x="12" y="170" font-size="13" font-weight="400" fill="#9a8f7f">Shape</text>
+                        <text x="12" y="204" font-size="13" font-weight="400" fill="#9a8f7f">Accessibility</text>
+                        <text x="12" y="238" font-size="13" font-weight="400" fill="#9a8f7f">Advanced</text>
+
+                        <!-- Divider -->
+                        <line x1="176" y1="56" x2="176" y2="600" stroke="#e5ddd0" stroke-width="1"/>
+
+                        <!-- Preview Region -->
+                        <rect x="176" y="56" width="928" height="488" fill="#1a1a1a" stroke="#e5ddd0" stroke-width="1" style="filter: drop-shadow(inset 0 1px 2px rgba(0,0,0,0.1))"/>
+
+                        <!-- Preview Toolbar -->
+                        <rect x="176" y="56" width="928" height="44" fill="#2d2d2d" stroke="#3d3d3d" stroke-width="1"/>
+                        <text x="196" y="80" font-size="12" fill="#e5e5e5" font-weight="400">Document</text>
+                        <text x="320" y="80" font-size="12" fill="#e5e5e5">Light / </text>
+                        <circle cx="376" cy="78" r="8" fill="#505050" stroke="#666" stroke-width="1"/>
+                        <text x="395" y="80" font-size="12" fill="#e5e5e5">Dark / System</text>
+                        <text x="620" y="80" font-size="12" fill="#e5e5e5">Fit</text>
+                        <rect x="880" y="62" width="24" height="24" rx="8" fill="#404040" stroke="#505050" stroke-width="1"/>
+                        <text x="892" y="77" font-size="13" fill="#999" text-anchor="middle">⋯</text>
+
+                        <!-- Preview Canvas -->
+                        <rect x="200" y="120" width="880" height="380" fill="#0f172a" rx="4" style="filter: drop-shadow(inset 0 2px 4px rgba(0,0,0,0.2))"/>
+
+                        <!-- Navbar -->
+                        <rect x="200" y="120" width="880" height="40" fill="#1e293b" rx="3"/>
+                        <circle cx="220" cy="140" r="4" fill="#64748b"/>
+                        <text x="240" y="143" font-size="11" fill="#cbd5e1">Research Board</text>
+
+                        <!-- Document title -->
+                        <text x="220" y="192" font-size="18" font-weight="600" fill="#e2e8f0">Market Analysis Q3</text>
+
+                        <!-- Prose -->
+                        <line x1="220" y1="210" x2="900" y2="210" stroke="#475569" stroke-width="1"/>
+                        <text x="220" y="232" font-size="12" fill="#cbd5e1">The emerging competitive landscape has shifted substantially in favor</text>
+                        <text x="220" y="250" font-size="12" fill="#cbd5e1">of integrated solutions. Market research from Q2 indicates a 15% shift</text>
+                        <text x="220" y="268" font-size="12" fill="#cbd5e1">toward platforms that bundle analytics and reporting.</text>
+
+                        <!-- Link -->
+                        <text x="220" y="292" font-size="12" fill="#38bdf8">Read competitive report →</text>
+
+                        <!-- Callout -->
+                        <rect x="220" y="310" width="680" height="50" fill="#1e293b" stroke="#334155" stroke-width="1" rx="4" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1))"/>
+                        <text x="235" y="328" font-size="12" fill="#f1f5f9">⚠</text>
+                        <text x="260" y="328" font-size="12" fill="#cbd5e1">Pricing adjustment required by end of month to remain</text>
+                        <text x="260" y="346" font-size="12" fill="#cbd5e1">competitive. See strategy document.</text>
+
+                        <!-- Metadata -->
+                        <text x="220" y="388" font-size="11" fill="#64748b">Updated 3h ago • 2,400 words • 12 comments</text>
+
+                        <!-- Action -->
+                        <rect x="220" y="403" width="120" height="32" fill="#0ea5e9" rx="6" style="filter: drop-shadow(0 1px 2px rgba(0,0,0,0.08))"/>
+                        <text x="280" y="423" font-size="12" fill="white" text-anchor="middle" font-weight="500">Add Comment</text>
+
+                        <!-- Data table -->
+                        <line x1="220" y1="448" x2="900" y2="448" stroke="#475569" stroke-width="1"/>
+                        <text x="220" y="468" font-size="11" fill="#94a3b8">Region</text>
+                        <text x="340" y="468" font-size="11" fill="#94a3b8">Q2 Revenue</text>
+                        <text x="520" y="468" font-size="11" fill="#94a3b8">Growth %</text>
+                        <text x="220" y="488" font-size="11" fill="#cbd5e1">North America</text>
+                        <text x="340" y="488" font-size="11" fill="#cbd5e1">$2.4M</text>
+                        <text x="520" y="488" font-size="11" fill="#10b981">+12%</text>
+
+                        <!-- Preview Status -->
+                        <text x="220" y="533" font-size="11" fill="#64748b">Previewing draft · Graphite · Dark</text>
+
+                        <!-- Divider -->
+                        <line x1="1104" y1="56" x2="1104" y2="600" stroke="#e5ddd0" stroke-width="1"/>
+
+                        <!-- Inspector -->
+                        <rect x="1104" y="56" width="336" height="544" fill="#fefdfb" stroke="#e5ddd0" stroke-width="1"/>
+
+                        <!-- Inspector Header -->
+                        <text x="1120" y="78" font-size="14" font-weight="600" fill="#2a2420">Colors</text>
+                        <text x="1120" y="96" font-size="12" fill="#9a8f7f">Edit primary and accent seeds</text>
+                        <line x1="1104" y1="110" x2="1440" y2="110" stroke="#e5ddd0" stroke-width="1"/>
+
+                        <!-- Primary Section -->
+                        <text x="1120" y="132" font-size="12" font-weight="600" fill="#2a2420">Primary</text>
+                        <rect x="1116" y="143" width="304" height="28" rx="6" fill="white" stroke="#d1d5db" stroke-width="1" style="filter: drop-shadow(0 1px 2px rgba(0,0,0,0.04))"/>
+                        <circle cx="1132" cy="157" r="8" fill="#6366f1"/>
+                        <text x="1160" y="160" font-size="12" fill="#2a2420">oklch(50% 0.2 310)</text>
+
+                        <!-- Color Scale -->
+                        <text x="1120" y="190" font-size="11" font-weight="500" fill="#9a8f7f">Generated scale</text>
+                        <rect x="1116" y="200" width="16" height="14" fill="#110e2d" rx="2"/>
+                        <rect x="1134" y="200" width="16" height="14" fill="#1a0d4d" rx="2"/>
+                        <rect x="1152" y="200" width="16" height="14" fill="#241f7f" rx="2"/>
+                        <rect x="1170" y="200" width="16" height="14" fill="#3730a3" rx="2"/>
+                        <rect x="1188" y="200" width="16" height="14" fill="#4c1d95" rx="2"/>
+                        <rect x="1206" y="200" width="16" height="14" fill="#6d28d9" rx="2"/>
+                        <rect x="1224" y="200" width="16" height="14" fill="#7c3aed" rx="2"/>
+                        <text x="1116" y="224" font-size="10" fill="#b5aca3">50</text>
+                        <text x="1206" y="224" font-size="10" fill="#b5aca3">950</text>
+
+                        <!-- Divider -->
+                        <line x1="1104" y1="242" x2="1440" y2="242" stroke="#e5ddd0" stroke-width="1"/>
+
+                        <!-- Accent Section -->
+                        <text x="1120" y="264" font-size="12" font-weight="600" fill="#2a2420">Accent</text>
+                        <text x="1120" y="282" font-size="12" fill="#9a8f7f">Using neutral default</text>
+                        <rect x="1116" y="294" width="304" height="36" rx="6" fill="#f1e8d9" stroke="#e5ddd0" stroke-width="1" style="filter: drop-shadow(0 1px 2px rgba(0,0,0,0.04))"/>
+                        <text x="1128" y="318" font-size="12" fill="#2a2420" font-weight="500">+ Customize accent</text>
+
+                        <!-- Divider -->
+                        <line x1="1104" y1="338" x2="1440" y2="338" stroke="#e5ddd0" stroke-width="1"/>
+
+                        <!-- Semantic Mapping -->
+                        <text x="1120" y="360" font-size="12" font-weight="600" fill="#2a2420">Semantic roles</text>
+                        <text x="1120" y="378" font-size="11" fill="#9a8f7f">Background, foreground, accent…</text>
+                        <text x="1128" y="400" font-size="11" fill="#2a2420" font-weight="500">→ Show all mappings</text>
+                    </svg>
+                </div>
+
+                <div class="annotations">
+                    <h4>Visual Decisions</h4>
+                    <ul>
+                        <li><strong>Warmth:</strong> Warm taupe/caramel undertones (#faf8f3, #6b5b45) create approachability without dated beige aesthetic.</li>
+                        <li><strong>Elevation:</strong> Restrained drop shadows (1–2px) on buttons and surfaces create subtle depth. No heavy shadowing. Soft material quality.</li>
+                        <li><strong>Radius:</strong> Consistent 8–10px radius across buttons, inputs, and cards. Softer than flat design but not rounded pill-style.</li>
+                        <li><strong>Selected state:</strong> Warm accent background (#f1e8d9) with soft shadow. Feels selected without being harsh or neon-bright.</li>
+                        <li><strong>Overall tone:</strong> Premium ledger or manuscript tool. Technical precision meets handcrafted quality. "High-end creative instrument."</li>
+                    </ul>
+                </div>
+
+                <div class="tradeoffs">
+                    <h4>Trade-offs</h4>
+                    <ul>
+                        <li><strong>Warmth and approachability:</strong> Softens technical austere feel. More inviting over sustained use than pure neutrals.</li>
+                        <li><strong>Visual weight:</strong> Subtle shadows add perceived depth. Helps regions feel distinct without using borders everywhere.</li>
+                        <li><strong>Risk:</strong> Warm palette can feel dated or precious if not executed carefully. Requires restraint to avoid "cozy but immature" feel.</li>
+                        <li><strong>Contrast:</strong> Warm neutrals may reduce contrast. Careful color testing needed to maintain WCAG AA. Darker text required.</li>
+                        <li><strong>Brand character:</strong> Balances Synapcity's "technical" and "editorial" positioning. Feels like a serious tool made by people with taste.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="recommendation">
+            <h3>Recommendation: Warm Technical Ledger (Variant 3)</h3>
+            <p>
+                <strong>Warm Technical Ledger</strong> best serves Synapcity's positioning as a calm, editorial, technical tool without sacrificing clarity or precision.
+            </p>
+            <p style="margin-top: 12px;">
+                <strong>Why:</strong>
+            </p>
+            <ul style="margin-left: 16px; margin-top: 8px; list-style: none;">
+                <li style="margin-bottom: 6px;">• <strong>Neutrality with humanity:</strong> Warm taupe greys feel less clinical than pure neutrals while remaining neutral-first. The 8–10px radius and restrained shadows convey a mature, well-crafted tool without being decorative.</li>
+                <li style="margin-bottom: 6px;">• <strong>Brand alignment:</strong> "Calm, technical, editorial" personality requires restraint (eliminating Variant 1's coldness) and precision (avoiding Variant 2's decorative weight). Variant 3 splits the difference.</li>
+                <li style="margin-bottom: 6px;">• <strong>Legibility and contrast:</strong> Warm greys with darker text (#2a2420) maintain WCAG AA contrast better than Variant 2's lighter palette. Technical accuracy is never sacrificed.</li>
+                <li style="margin-bottom: 6px;">• <strong>Extended use:</strong> Subtle material feel (soft shadows, paper-like surfaces) reduces eye fatigue over sustained editing sessions. The preview feels properly isolated without aggressive dark/light contrast breaking.</li>
+                <li style="margin-bottom: 6px;">• <strong>Scalability:</strong> Warm Technical Ledger works equally well in light and dark application themes without requiring separate builder variants. The warm undertone feels intentional in both contexts.</li>
+            </ul>
+            <p style="margin-top: 12px;">
+                <strong>Rationale against the other variants:</strong>
+            </p>
+            <ul style="margin-left: 16px; margin-top: 8px; list-style: none;">
+                <li style="margin-bottom: 6px;">• Variant 1 (Neutral Technical) is precise and familiar but feels austere and uninviting for a "calm" product. Linear/Figma users recognize it immediately, but at the cost of personality.</li>
+                <li style="margin-bottom: 6px;">• Variant 2 (Editorial Instrument) succeeds at warmth and character but the heavier dividers, italic secondary text, and bolder typography risk feeling over-designed for a tool focused on user content (the preview) rather than the interface itself.</li>
+            </ul>
+            <p style="margin-top: 12px;">
+                Proceed with Variant 3, focusing on precise execution: test warm neutral palette (#faf8f3, #fefdfb, #e5ddd0, #9a8f7f) for WCAG contrast, calibrate drop-shadow opacity to avoid muddiness, and ensure 8–10px radius is consistently applied across interactive elements.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function switchVariant(variant) {
+            // Hide all variants
+            document.querySelectorAll('.variant').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.toggle-btn').forEach(el => el.classList.remove('active'));
+
+            // Show selected variant
+            document.getElementById(variant).classList.add('active');
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>

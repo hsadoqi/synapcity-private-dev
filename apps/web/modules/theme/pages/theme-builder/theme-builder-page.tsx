@@ -12,9 +12,11 @@ import {
   Plus,
   RotateCcw,
   Save,
+  X,
 } from "lucide-react"
 
 import { Button } from "@workspace/ui/components/primitives/button"
+import { cn } from "@workspace/ui/lib/utils"
 import {
   Dialog,
   DialogClose,
@@ -43,7 +45,7 @@ import { generatePalette } from "../../engine/generate-palette"
 import { getThemeFontOptions } from "../../font-registry"
 import { useThemes } from "../../hooks/use-themes"
 import { ThemePreviewBoundary } from "../../components/theme-preview-boundary"
-import type { ThemeDraft, ThemeFontId, ThemeRecord } from "../../types"
+import type { ThemeDraft, ThemeFontId } from "../../types"
 import {
   areThemeDraftsEqual,
   buildThemeRecordFromDraft,
@@ -94,6 +96,9 @@ const APPEARANCES: Array<{ id: ThemePreviewAppearance; label: string }> = [
   { id: "system", label: "System" },
 ]
 
+const SECTION_STRIP_WIDTH = 1120
+const INSPECTOR_SHEET_WIDTH = 1180
+
 function createThemeId() {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return `theme-${crypto.randomUUID()}`
@@ -102,10 +107,49 @@ function createThemeId() {
   return `theme-${Date.now().toString(36)}`
 }
 
+function getEffectiveWindowWidth() {
+  if (typeof window === "undefined") return 1440
+
+  const rootFontSize = Number.parseFloat(
+    window.getComputedStyle(document.documentElement).fontSize
+  )
+  const textScale =
+    Number.isFinite(rootFontSize) && rootFontSize > 0 ? rootFontSize / 16 : 1
+
+  return window.innerWidth / Math.max(1, textScale)
+}
+
+function useEffectiveWindowWidth() {
+  const [width, setWidth] = React.useState(getEffectiveWindowWidth)
+
+  React.useEffect(() => {
+    const handleResize = () => setWidth(getEffectiveWindowWidth())
+
+    handleResize()
+    window.addEventListener("resize", handleResize)
+
+    const observer =
+      typeof ResizeObserver === "undefined"
+        ? null
+        : new ResizeObserver(handleResize)
+    observer?.observe(document.documentElement)
+
+    return () => {
+      window.removeEventListener("resize", handleResize)
+      observer?.disconnect()
+    }
+  }, [])
+
+  return width
+}
+
 export function ThemeBuilderPage(props: ThemeBuilderPageProps) {
   const router = useRouter()
   const { resolvedTheme } = useTheme()
-  const { assignments, saveTheme, themes } = useThemes()
+  const { saveTheme, themes } = useThemes()
+  const windowWidth = useEffectiveWindowWidth()
+  const useSectionStrip = windowWidth < SECTION_STRIP_WIDTH
+  const useInspectorSheet = windowWidth < INSPECTOR_SHEET_WIDTH
   const persistedTheme =
     props.mode === "edit"
       ? themes.find((theme) => theme.id === props.themeId)
@@ -135,6 +179,10 @@ export function ThemeBuilderPage(props: ThemeBuilderPageProps) {
   const [announcement, setAnnouncement] = React.useState("")
   const [pendingNavigation, setPendingNavigation] =
     React.useState<PendingNavigation>(null)
+  const [inspectorState, setInspectorState] = React.useState<
+    "default" | "open" | "closed"
+  >("default")
+  const inspectorTriggerRef = React.useRef<HTMLButtonElement | null>(null)
 
   const validation = React.useMemo(() => validateThemeDraft(draft), [draft])
   const isDirty =
@@ -148,6 +196,9 @@ export function ThemeBuilderPage(props: ThemeBuilderPageProps) {
   const canSaveExisting =
     props.mode === "edit" && Boolean(persistedTheme) && isDirty && validation.valid
   const canCreate = props.mode === "new" && validation.valid
+  const inspectorOpen =
+    inspectorState === "open" ||
+    (inspectorState === "default" && !useInspectorSheet)
 
   React.useEffect(() => {
     if (!isDirty) return
@@ -172,6 +223,20 @@ export function ThemeBuilderPage(props: ThemeBuilderPageProps) {
 
   function announce(message: string) {
     setAnnouncement(message)
+  }
+
+  function openInspector() {
+    setInspectorState("open")
+  }
+
+  function closeInspector() {
+    setInspectorState("closed")
+    const restoreFocus = () => inspectorTriggerRef.current?.focus()
+    if (typeof window.requestAnimationFrame === "function") {
+      window.requestAnimationFrame(restoreFocus)
+    } else {
+      window.setTimeout(restoreFocus, 0)
+    }
   }
 
   function persistExisting() {
@@ -321,7 +386,10 @@ export function ThemeBuilderPage(props: ThemeBuilderPageProps) {
   }
 
   return (
-    <section className="-mx-6 -my-8 flex h-[calc(100svh-5.5rem)] min-h-[680px] flex-col overflow-hidden bg-background">
+    <section
+      data-testid="theme-builder-shell"
+      className="-mx-6 -my-8 flex h-[calc(100svh-5.5rem)] min-h-[680px] flex-col overflow-hidden bg-background"
+    >
       <CommandBar
         canCreate={canCreate}
         canSaveExisting={canSaveExisting}
@@ -336,29 +404,58 @@ export function ThemeBuilderPage(props: ThemeBuilderPageProps) {
         onSaveAsNew={saveAsNew}
         onBack={requestBack}
       />
-      <div className="grid min-h-0 flex-1 grid-cols-[176px_minmax(520px,1fr)_336px] border-t border-border max-[1120px]:grid-cols-[160px_minmax(420px,1fr)_320px]">
+      <div
+        data-testid="theme-builder-grid"
+        className={cn(
+          "min-h-0 min-w-0 flex-1 border-t border-border",
+          useSectionStrip
+            ? "flex flex-col"
+            : "grid grid-cols-[176px_minmax(0,1fr)]"
+        )}
+      >
         <SectionRail
+          orientation={useSectionStrip ? "horizontal" : "vertical"}
           section={preview.section}
           onSectionChange={(section) =>
             setPreview((current) => ({ ...current, section }))
           }
         />
-        <PreviewRegion
-          draft={draft}
-          isDirty={isDirty}
-          preview={preview}
-          resolvedTheme={resolvedTheme}
-          onPreviewChange={(patch) =>
-            setPreview((current) => ({ ...current, ...patch }))
-          }
-        />
-        <Inspector
-          draft={draft}
-          section={preview.section}
-          validation={validation}
-          onDraftChange={updateDraft}
-          onSeedsChange={updateSeeds}
-        />
+        <div
+          className={cn(
+            "relative min-h-0 min-w-0",
+            !useSectionStrip &&
+              (inspectorOpen
+                ? "grid grid-cols-[minmax(520px,1fr)_336px] max-[1360px]:grid-cols-[minmax(0,1fr)_320px]"
+                : "flex"),
+            useSectionStrip &&
+              (inspectorOpen && !useInspectorSheet
+                ? "grid flex-1 grid-cols-[minmax(0,1fr)_320px]"
+                : "flex flex-1")
+          )}
+        >
+          <PreviewRegion
+            draft={draft}
+            inspectorButtonRef={inspectorTriggerRef}
+            isDirty={isDirty}
+            preview={preview}
+            resolvedTheme={resolvedTheme}
+            onOpenInspector={openInspector}
+            onPreviewChange={(patch) =>
+              setPreview((current) => ({ ...current, ...patch }))
+            }
+          />
+          {inspectorOpen ? (
+            <Inspector
+              draft={draft}
+              isSheet={useInspectorSheet}
+              section={preview.section}
+              validation={validation}
+              onClose={closeInspector}
+              onDraftChange={updateDraft}
+              onSeedsChange={updateSeeds}
+            />
+          ) : null}
+        </div>
       </div>
       <div aria-live="polite" className="sr-only">
         {announcement}
@@ -544,23 +641,34 @@ function DescriptionTrigger({
 }
 
 function SectionRail({
+  orientation,
   section,
   onSectionChange,
 }: {
+  orientation: "horizontal" | "vertical"
   section: ThemeBuilderSection
   onSectionChange: (section: ThemeBuilderSection) => void
 }) {
   const enabledSections = SECTIONS.filter((item) => item.enabled)
+  const horizontal = orientation === "horizontal"
 
   return (
     <nav
       aria-label="Theme sections"
-      className="flex min-h-0 flex-col border-r border-border bg-surface-muted/35 p-3"
+      data-orientation={orientation}
+      className={cn(
+        "min-h-0 bg-surface-muted/35 p-3",
+        horizontal
+          ? "flex shrink-0 overflow-x-auto border-b border-border"
+          : "flex flex-col border-r border-border"
+      )}
       onKeyDown={(event) => {
-        if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return
+        const previousKey = horizontal ? "ArrowLeft" : "ArrowUp"
+        const nextKey = horizontal ? "ArrowRight" : "ArrowDown"
+        if (event.key !== nextKey && event.key !== previousKey) return
         event.preventDefault()
         const currentIndex = enabledSections.findIndex((item) => item.id === section)
-        const offset = event.key === "ArrowDown" ? 1 : -1
+        const offset = event.key === nextKey ? 1 : -1
         const next =
           enabledSections[
             (currentIndex + offset + enabledSections.length) %
@@ -569,7 +677,7 @@ function SectionRail({
         if (next) onSectionChange(next.id)
       }}
     >
-      <div className="flex flex-col gap-1">
+      <div className={cn("flex gap-1", horizontal ? "flex-row" : "flex-col")}>
         {SECTIONS.map((item) => (
           <button
             key={item.id}
@@ -577,7 +685,10 @@ function SectionRail({
             aria-current={section === item.id ? "page" : undefined}
             disabled={!item.enabled}
             onClick={() => item.enabled && onSectionChange(item.id)}
-            className="flex h-9 items-center px-3 text-left text-sm text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-45 aria-current:bg-muted aria-current:font-medium aria-current:text-foreground"
+            className={cn(
+              "flex h-9 items-center whitespace-nowrap px-3 text-left text-sm text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-45 aria-current:bg-muted aria-current:font-medium aria-current:text-foreground",
+              horizontal ? "min-w-11 justify-center" : ""
+            )}
           >
             {item.label}
           </button>
@@ -589,15 +700,19 @@ function SectionRail({
 
 function PreviewRegion({
   draft,
+  inspectorButtonRef,
   isDirty,
+  onOpenInspector,
   onPreviewChange,
   preview,
   resolvedTheme,
 }: {
   draft: ThemeDraft
+  inspectorButtonRef: React.RefObject<HTMLButtonElement | null>
   isDirty: boolean
   preview: ThemeBuilderPreviewState
   resolvedTheme?: string
+  onOpenInspector: () => void
   onPreviewChange: (patch: Partial<ThemeBuilderPreviewState>) => void
 }) {
   const viewport = VIEWPORTS.find((item) => item.id === preview.viewport)
@@ -609,39 +724,57 @@ function PreviewRegion({
         : "Light"
 
   return (
-    <div className="flex min-h-0 min-w-0 flex-col bg-background">
-      <div className="flex h-11 shrink-0 items-center gap-3 border-b border-border px-3">
-        <LabeledToggle
-          label="Scenario"
-          value={preview.scenario}
-          items={SCENARIOS}
-          onValueChange={(value) =>
-            value && onPreviewChange({ scenario: value as ThemePreviewScenario })
-          }
-        />
-        <div className="h-5 w-px bg-border" aria-hidden="true" />
-        <LabeledToggle
-          label="Appearance"
-          value={preview.appearance}
-          items={APPEARANCES}
-          onValueChange={(value) =>
-            value &&
-            onPreviewChange({ appearance: value as ThemePreviewAppearance })
-          }
-        />
-        <div className="h-5 w-px bg-border" aria-hidden="true" />
-        <LabeledToggle
-          label="Viewport"
-          value={preview.viewport}
-          items={VIEWPORTS}
-          onValueChange={(value) =>
-            value && onPreviewChange({ viewport: value as ThemePreviewViewport })
-          }
-        />
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-background">
+      <div
+        aria-label="Preview toolbar"
+        className="flex h-11 shrink-0 items-center justify-between gap-3 border-b border-border px-3"
+      >
+        <div className="flex min-w-0 items-center gap-3 overflow-hidden">
+          <LabeledSelect
+            label="Scenario"
+            value={preview.scenario}
+            items={SCENARIOS}
+            onValueChange={(value) =>
+              onPreviewChange({ scenario: value as ThemePreviewScenario })
+            }
+          />
+          <div className="h-5 w-px bg-border" aria-hidden="true" />
+          <LabeledToggle
+            label="Appearance"
+            value={preview.appearance}
+            items={APPEARANCES}
+            onValueChange={(value) =>
+              value &&
+              onPreviewChange({ appearance: value as ThemePreviewAppearance })
+            }
+          />
+          <div className="h-5 w-px bg-border" aria-hidden="true" />
+          <LabeledSelect
+            label="Viewport"
+            value={preview.viewport}
+            items={VIEWPORTS}
+            onValueChange={(value) =>
+              onPreviewChange({ viewport: value as ThemePreviewViewport })
+            }
+          />
+        </div>
+        <Button
+          ref={inspectorButtonRef}
+          type="button"
+          variant="outline"
+          size="xs"
+          className="shrink-0"
+          onClick={onOpenInspector}
+        >
+          Edit {SECTIONS.find((item) => item.id === preview.section)?.label}
+        </Button>
       </div>
-      <div className="min-h-0 flex-1 overflow-auto bg-surface-muted/45 p-6">
+      <div
+        data-testid="theme-preview-scroll"
+        className="min-h-0 flex-1 overflow-auto bg-surface-muted/45 p-6"
+      >
         <div
-          className="mx-auto min-h-full border border-border bg-background"
+          className="mx-auto min-h-full bg-background ring-1 ring-border"
           style={{ width: viewport?.width ?? "100%" }}
         >
           <ThemePreviewBoundary
@@ -657,6 +790,36 @@ function PreviewRegion({
         {draft.name || "Untitled theme"} · {appearanceLabel}
       </div>
     </div>
+  )
+}
+
+function LabeledSelect<T extends string>({
+  items,
+  label,
+  onValueChange,
+  value,
+}: {
+  items: Array<{ id: T; label: string }>
+  label: string
+  value: T
+  onValueChange: (value: string) => void
+}) {
+  return (
+    <label className="flex min-w-0 items-center gap-2 text-xs">
+      <span className="text-muted-foreground">{label}</span>
+      <select
+        aria-label={label}
+        value={value}
+        onChange={(event) => onValueChange(event.target.value)}
+        className="h-7 min-w-24 rounded-none border border-border bg-background px-2 text-xs text-foreground outline-none focus-visible:ring-1 focus-visible:ring-ring"
+      >
+        {items.map((item) => (
+          <option key={item.id} value={item.id}>
+            {item.label}
+          </option>
+        ))}
+      </select>
+    </label>
   )
 }
 
@@ -694,32 +857,56 @@ function LabeledToggle<T extends string>({
 
 function Inspector({
   draft,
+  isSheet,
+  onClose,
   onDraftChange,
   onSeedsChange,
   section,
   validation,
 }: {
   draft: ThemeDraft
+  isSheet: boolean
   section: ThemeBuilderSection
   validation: ReturnType<typeof validateThemeDraft>
+  onClose: () => void
   onDraftChange: (patch: Partial<ThemeDraft>) => void
   onSeedsChange: (seeds: ThemeDraft["seeds"]) => void
 }) {
+  const sectionLabel = SECTIONS.find((item) => item.id === section)?.label ?? "Theme"
+
   return (
-    <aside className="flex min-h-0 flex-col border-l border-border bg-background">
-      <div className="flex h-13 shrink-0 flex-col justify-center border-b border-border px-4">
-        <h2 className="text-sm font-medium text-foreground">
-          {SECTIONS.find((item) => item.id === section)?.label}
-        </h2>
-        <p className="text-xs text-muted-foreground">
-          {section === "colors"
-            ? "Author color seeds and inspect generated scales."
-            : section === "typography"
-              ? "Set font roles and type scale."
-              : section === "shape"
-                ? "Adjust the base radius used inside the preview."
-                : "Implementation deferred."}
-        </p>
+    <aside
+      className={cn(
+        "flex min-h-0 flex-col border-l border-border bg-background",
+        isSheet
+          ? "absolute inset-y-0 right-0 z-20 w-[336px] max-w-[calc(100%-2rem)] shadow-[0_0_0_1px_hsl(var(--border))]"
+          : ""
+      )}
+    >
+      <div className="flex h-13 shrink-0 items-center justify-between gap-3 border-b border-border px-4">
+        <div className="min-w-0">
+          <h2 className="truncate text-sm font-medium text-foreground">
+            {sectionLabel}
+          </h2>
+          <p className="truncate text-xs text-muted-foreground">
+            {section === "colors"
+              ? "Author color seeds and inspect generated scales."
+              : section === "typography"
+                ? "Set font roles and type scale."
+                : section === "shape"
+                  ? "Adjust the base radius used inside the preview."
+                  : "Implementation deferred."}
+          </p>
+        </div>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          aria-label={`Close ${sectionLabel} inspector`}
+          onClick={onClose}
+        >
+          <X />
+        </Button>
       </div>
       <div className="min-h-0 flex-1 overflow-auto p-4">
         {section === "colors" ? (
@@ -860,7 +1047,10 @@ function PaletteStrip({ label, seed }: { label: string; seed: string }) {
   return (
     <div className="flex flex-col gap-2">
       <p className="text-xs font-medium text-muted-foreground">{label}</p>
-      <div className="grid grid-cols-11 border border-border" aria-label={label}>
+      <div
+        className="grid grid-cols-11 border border-border"
+        aria-label={`${label} palette`}
+      >
         {steps.map((step) => (
           <span
             key={step}
