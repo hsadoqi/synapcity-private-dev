@@ -1,6 +1,8 @@
 import * as React from "react"
-import { render, screen, within } from "@testing-library/react"
-import { describe, expect, it } from "vitest"
+import { fireEvent, render, screen, within } from "@testing-library/react"
+import { describe, expect, it, vi } from "vitest"
+
+import { TooltipProvider } from "@workspace/ui/components"
 
 import { DesktopContextPanel } from "./desktop-panel-content"
 import { ContextPanelSheet } from "./context-panel-sheet"
@@ -18,17 +20,21 @@ import {
 function Registrant({
   title,
   bodyText,
+  body,
+  slot: explicitSlot,
   enabled = true,
 }: {
-  title: string
-  bodyText: string
+  title?: string
+  bodyText?: string
+  body?: React.ReactNode
+  slot?: ContextPanelSlot
   enabled?: boolean
 }) {
   const slot: ContextPanelSlot | null = enabled
-    ? {
-        header: { title, description: `${title} description` },
-        body: <div data-testid="registrant-body">{bodyText}</div>,
-      }
+    ? (explicitSlot ?? {
+        header: { title: title!, description: `${title} description` },
+        body: body ?? <div data-testid="registrant-body">{bodyText}</div>,
+      })
     : null
 
   useRegisterContextPanel(slot)
@@ -39,6 +45,14 @@ function Registrant({
 // title unconditionally when no slot is registered — used as the marker
 // for "restored to generic panel" in these tests.
 const GENERIC_FALLBACK_MARKER = "Dashboard"
+
+const documentSlot: ContextPanelSlot = {
+  header: {
+    title: "Document",
+    description: "Product vision",
+  },
+  body: <div data-testid="document-panel-body">Document outline</div>,
+}
 
 function DesktopHarness() {
   return (
@@ -51,17 +65,43 @@ function MobileHarness() {
 }
 
 describe("context panel slot", () => {
-  it("registers a route's content into the desktop panel", () => {
+  it("renders registered metadata and body in the desktop host", () => {
     render(
       <ContextPanelSlotProvider>
-        <Registrant title="Document" bodyText="Outline for doc-1" />
+        <Registrant slot={documentSlot} />
         <DesktopHarness />
       </ContextPanelSlotProvider>
     )
 
-    expect(screen.getByText("Document")).toBeInTheDocument()
-    expect(screen.getByText("Outline for doc-1")).toBeInTheDocument()
+    const panel = screen.getByLabelText("Context panel")
+    expect(
+      within(panel).getByRole("heading", { name: "Document" })
+    ).toBeInTheDocument()
+    expect(within(panel).getByTestId("document-panel-body")).toHaveTextContent(
+      "Document outline"
+    )
+    expect(
+      within(panel).queryByRole("heading", { name: "Outline" })
+    ).not.toBeInTheDocument()
     expect(screen.queryByText(GENERIC_FALLBACK_MARKER)).not.toBeInTheDocument()
+  })
+
+  it("renders registered metadata and body in the mobile dialog", () => {
+    render(
+      <ContextPanelSlotProvider>
+        <Registrant slot={documentSlot} />
+        <MobileHarness />
+      </ContextPanelSlotProvider>
+    )
+
+    const dialog = screen.getByRole("dialog")
+    expect(
+      within(dialog).getByRole("heading", { name: "Document" })
+    ).toBeInTheDocument()
+    expect(within(dialog).getByText("Product vision")).toBeInTheDocument()
+    expect(within(dialog).getByTestId("document-panel-body")).toHaveTextContent(
+      "Document outline"
+    )
   })
 
   it("restores the generic panel once the registering route unmounts", () => {
@@ -85,14 +125,120 @@ describe("context panel slot", () => {
     expect(screen.getByText(GENERIC_FALLBACK_MARKER)).toBeInTheDocument()
   })
 
-  it("shows the generic panel by default when nothing has registered", () => {
+  it("shows the generic fallback in the desktop host", () => {
     render(
       <ContextPanelSlotProvider>
         <DesktopHarness />
       </ContextPanelSlotProvider>
     )
 
+    expect(
+      screen.getByRole("heading", { name: "Context" })
+    ).toBeInTheDocument()
     expect(screen.getByText(GENERIC_FALLBACK_MARKER)).toBeInTheDocument()
+    expect(
+      screen.getByRole("navigation", { name: "Context panel navigation" })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: "Notifications" })
+    ).toBeInTheDocument()
+    expect(screen.getAllByRole("button", { name: "Settings" })).toHaveLength(2)
+  })
+
+  it("shows the generic fallback in the mobile dialog", () => {
+    render(
+      <ContextPanelSlotProvider>
+        <MobileHarness />
+      </ContextPanelSlotProvider>
+    )
+
+    const dialog = screen.getByRole("dialog")
+    expect(
+      within(dialog).getByRole("heading", { name: "Context" })
+    ).toBeInTheDocument()
+    expect(
+      within(dialog).getByText("Tools and information for this workspace.")
+    ).toBeInTheDocument()
+    expect(
+      within(dialog).getByRole("navigation", {
+        name: "Context panel navigation",
+      })
+    ).toBeInTheDocument()
+    expect(
+      within(dialog).getByRole("button", { name: "Notifications" })
+    ).toBeInTheDocument()
+    expect(
+      within(dialog).getAllByRole("button", { name: "Settings" })
+    ).toHaveLength(2)
+  })
+
+  it("renders only Expand while collapsed and restores controlled registered state", () => {
+    const onExpand = vi.fn()
+
+    function Harness({ collapsed }: { collapsed: boolean }) {
+      const [activeSection, setActiveSection] = React.useState("outline")
+
+      return (
+        <TooltipProvider>
+          <ContextPanelSlotProvider>
+            <Registrant
+              title="Document"
+              body={
+                <div data-testid="controlled-document-panel">
+                  <output aria-label="Active document section">
+                    {activeSection}
+                  </output>
+                  <button
+                    type="button"
+                    onClick={() => setActiveSection("properties")}
+                  >
+                    Select properties
+                  </button>
+                </div>
+              }
+            />
+            <DesktopContextPanel
+              collapsed={collapsed}
+              onCollapse={() => {}}
+              onExpand={onExpand}
+            />
+          </ContextPanelSlotProvider>
+        </TooltipProvider>
+      )
+    }
+
+    const { rerender } = render(<Harness collapsed={false} />)
+    fireEvent.click(
+      screen.getByRole("button", { name: "Select properties" })
+    )
+    expect(screen.getByLabelText("Active document section")).toHaveTextContent(
+      "properties"
+    )
+
+    rerender(<Harness collapsed />)
+
+    const collapsedPanel = screen.getByLabelText("Context panel")
+    expect(within(collapsedPanel).getAllByRole("button")).toHaveLength(1)
+    expect(
+      within(collapsedPanel).getByRole("button", {
+        name: "Expand context panel",
+      })
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByTestId("controlled-document-panel")
+    ).not.toBeInTheDocument()
+
+    fireEvent.click(
+      within(collapsedPanel).getByRole("button", {
+        name: "Expand context panel",
+      })
+    )
+    expect(onExpand).toHaveBeenCalledOnce()
+
+    rerender(<Harness collapsed={false} />)
+    expect(screen.getByLabelText("Active document section")).toHaveTextContent(
+      "properties"
+    )
   })
 
   it("updates the registered content when the active document changes", () => {

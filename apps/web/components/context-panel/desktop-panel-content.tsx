@@ -8,7 +8,6 @@ import { cn } from "@workspace/ui/lib/utils"
 
 import { ContextPanelContent } from "./context-panel-content"
 import { ContextPanelHeader } from "./context-panel-header"
-import { contextPanelNavigationSections } from "./context-panel-navigation"
 import { useContextPanelSlot } from "./context-panel-slot"
 
 type DesktopContextPanelProps = {
@@ -45,34 +44,11 @@ export function DesktopContextPanel({
               <PanelRightOpen />
             </Button>
           </div>
-          {slot?.collapsedIcon ? (
-            <Button
-              variant="ghost"
-              size="icon-lg"
-              aria-label="Expand"
-              onClick={onExpand}
-            >
-              {slot.collapsedIcon}
-            </Button>
-          ) : (
-            !slot &&
-            contextPanelNavigationSections.map((section) => (
-              <Button
-                key={section.title}
-                variant="ghost"
-                size="icon-lg"
-                aria-label="Expand"
-                onClick={onExpand}
-              >
-                <section.icon />
-              </Button>
-            ))
-          )}
         </div>
       ) : (
         <>
           <ContextPanelHeader
-            title={slot?.header.title}
+            title={slot?.header.title ?? "Context"}
             onCollapse={onCollapse}
           />
           {slot ? slot.body : <ContextPanelContent />}

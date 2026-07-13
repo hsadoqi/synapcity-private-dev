@@ -43,11 +43,41 @@ vi.mock("@workspace/ui/components", async () => {
 
   return {
     ResizableHandle: () => <div data-testid="resizable-handle" />,
-    ResizablePanel: ({ children }: { children: React.ReactNode }) => (
-      <div>{children}</div>
+    ResizablePanel: ({
+      children,
+      id,
+      minSize,
+      maxSize,
+      collapsedSize,
+      collapsible,
+    }: {
+      children: React.ReactNode
+      id: string
+      minSize?: string
+      maxSize?: string
+      collapsedSize?: string
+      collapsible?: boolean
+    }) => (
+      <div
+        data-testid={`resizable-panel-${id}`}
+        data-min-size={minSize}
+        data-max-size={maxSize}
+        data-collapsed-size={collapsedSize}
+        data-collapsible={collapsible ? "true" : "false"}
+      >
+        {children}
+      </div>
     ),
-    ResizablePanelGroup: ({ children }: { children: React.ReactNode }) => (
-      <div data-testid="desktop-layout">{children}</div>
+    ResizablePanelGroup: ({
+      children,
+      orientation,
+    }: {
+      children: React.ReactNode
+      orientation: string
+    }) => (
+      <div data-testid="desktop-layout" data-orientation={orientation}>
+        {children}
+      </div>
     ),
     useResizablePanelRef: () =>
       React.useRef({
@@ -80,6 +110,27 @@ describe("AppShell", () => {
     )
 
     expect(screen.getByTestId("desktop-layout")).toBeInTheDocument()
+    expect(screen.getByTestId("desktop-layout")).toHaveAttribute(
+      "data-orientation",
+      "horizontal"
+    )
+    expect(screen.getByTestId("resizable-handle")).toBeInTheDocument()
+    expect(screen.getByTestId("resizable-panel-context-panel")).toHaveAttribute(
+      "data-min-size",
+      "18rem"
+    )
+    expect(screen.getByTestId("resizable-panel-context-panel")).toHaveAttribute(
+      "data-max-size",
+      "48rem"
+    )
+    expect(screen.getByTestId("resizable-panel-context-panel")).toHaveAttribute(
+      "data-collapsed-size",
+      "2.5rem"
+    )
+    expect(screen.getByTestId("resizable-panel-context-panel")).toHaveAttribute(
+      "data-collapsible",
+      "true"
+    )
     expect(screen.getByText("Desktop context open")).toBeInTheDocument()
     expect(screen.queryByText("Mobile context sheet")).not.toBeInTheDocument()
   })
@@ -94,6 +145,10 @@ describe("AppShell", () => {
     )
 
     expect(screen.queryByTestId("desktop-layout")).not.toBeInTheDocument()
+    expect(
+      screen.queryByTestId("resizable-panel-context-panel")
+    ).not.toBeInTheDocument()
+    expect(screen.queryByText("Desktop context open")).not.toBeInTheDocument()
     expect(screen.getByText("Workspace")).toBeInTheDocument()
   })
 

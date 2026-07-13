@@ -23,15 +23,21 @@ import type {
   RelatedDocumentEntry,
 } from "./document-context-panel-data"
 
-type PanelTabId = "outline" | "properties" | "related"
+export type DocumentContextSectionId = "outline" | "properties" | "related"
 
-const TABS: { id: PanelTabId; label: string; icon: typeof ListTree }[] = [
+const DOCUMENT_CONTEXT_SECTIONS: ReadonlyArray<{
+  id: DocumentContextSectionId
+  label: string
+  icon: React.ComponentType<{ className?: string; "aria-hidden"?: boolean }>
+}> = [
   { id: "outline", label: "Outline", icon: ListTree },
   { id: "properties", label: "Properties", icon: SlidersHorizontal },
   { id: "related", label: "Related", icon: Link2 },
 ]
 
 interface DocumentContextPanelProps {
+  activeSection: DocumentContextSectionId
+  onActiveSectionChange: (section: DocumentContextSectionId) => void
   outline: OutlineEntry[]
   properties: PropertyEntry[]
   related: RelatedDocumentEntry[]
@@ -44,55 +50,55 @@ interface DocumentContextPanelProps {
  * selection state; see the module README).
  */
 export function DocumentContextPanel({
+  activeSection,
+  onActiveSectionChange,
   outline,
   properties,
   related,
   onSelectOutlineEntry,
 }: DocumentContextPanelProps) {
-  const [activeTab, setActiveTab] = React.useState<PanelTabId>("outline")
-  const activeTabLabel = TABS.find((tab) => tab.id === activeTab)?.label ?? ""
+  const activeSectionLabel =
+    DOCUMENT_CONTEXT_SECTIONS.find((section) => section.id === activeSection)
+      ?.label ?? ""
 
-  // Note on semantics: this is a segmented control (Radix ToggleGroup), not
-  // ARIA tabs (no role="tablist"/"tab"/"tabpanel") — there's no Tabs
-  // primitive in the design system yet, and bolting tab roles onto a
-  // toggle-group primitive that doesn't implement the matching keyboard
-  // model (arrow-key roving tabindex, etc.) would be less accessible than
-  // an honestly-labeled segmented control. The group has an accessible
-  // name, and the content region below announces which section is active.
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="border-b p-2">
         <ToggleGroup
           type="single"
-          value={activeTab}
+          value={activeSection}
           onValueChange={(value) => {
-            if (value) setActiveTab(value as PanelTabId)
+            if (value) {
+              onActiveSectionChange(value as DocumentContextSectionId)
+            }
           }}
           variant="outline"
           className="w-full"
           aria-label="Document panel section"
         >
-          {TABS.map((tab) => (
+          {DOCUMENT_CONTEXT_SECTIONS.map((section) => (
             <ToggleGroupItem
-              key={tab.id}
-              value={tab.id}
-              aria-label={tab.label}
+              key={section.id}
+              value={section.id}
+              aria-label={section.label}
               className="flex-1 gap-1.5"
             >
-              <tab.icon className="size-3.5" aria-hidden="true" />
-              <span className="hidden sm:inline">{tab.label}</span>
+              <section.icon className="size-3.5" aria-hidden="true" />
+              <span className="hidden sm:inline">{section.label}</span>
             </ToggleGroupItem>
           ))}
         </ToggleGroup>
       </div>
 
       <ScrollArea className="min-h-0 flex-1">
-        <div className="p-3" role="region" aria-label={activeTabLabel}>
-          {activeTab === "outline" && (
+        <div className="p-3" role="region" aria-label={activeSectionLabel}>
+          {activeSection === "outline" && (
             <OutlineTab entries={outline} onSelect={onSelectOutlineEntry} />
           )}
-          {activeTab === "properties" && <PropertiesTab entries={properties} />}
-          {activeTab === "related" && <RelatedTab entries={related} />}
+          {activeSection === "properties" && (
+            <PropertiesTab entries={properties} />
+          )}
+          {activeSection === "related" && <RelatedTab entries={related} />}
         </div>
       </ScrollArea>
     </div>

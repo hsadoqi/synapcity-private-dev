@@ -50,4 +50,19 @@ describe("useContextPanelController", () => {
     expect(result.current.isCollapsed).toBe(true)
     expect(panelRef.current.isCollapsed).toHaveBeenCalledTimes(1)
   })
+
+  it("keeps repeated synchronization of the same panel state stable", () => {
+    const panelRef = createPanelRef(true)
+    const { result } = renderHook(() => useContextPanelController(panelRef))
+
+    act(() => {
+      result.current.syncCollapsedState()
+      result.current.syncCollapsedState()
+    })
+
+    expect(panelRef.current.isCollapsed).toHaveBeenCalledTimes(2)
+    expect(panelRef.current.collapse).not.toHaveBeenCalled()
+    expect(panelRef.current.expand).not.toHaveBeenCalled()
+    expect(result.current.isCollapsed).toBe(true)
+  })
 })

@@ -4,10 +4,10 @@ import { PanelRightClose } from "lucide-react"
 import { Button } from "@workspace/ui/components"
 
 export function ContextPanelHeader({
-  title = "Context",
+  title,
   onCollapse,
 }: {
-  title?: string
+  title: string
   onCollapse?: () => void
 }) {
   return (

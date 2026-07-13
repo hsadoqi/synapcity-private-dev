@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { ListTree } from "lucide-react"
 import type { EditorState, LexicalEditor } from "lexical"
 import { useToast } from "@workspace/feedback"
 
@@ -33,7 +32,10 @@ import {
 import { updateDocument } from "@/modules/documents/services/document-data"
 import type { DocumentRecord } from "@/modules/documents/types"
 
-import { DocumentContextPanel } from "./document-context-panel"
+import {
+  DocumentContextPanel,
+  type DocumentContextSectionId,
+} from "./document-context-panel"
 import {
   deriveProperties,
   deriveRelatedDocuments,
@@ -102,6 +104,8 @@ export function DocumentWorkspace({
   const [saveState, setSaveState] = React.useState<DocumentSaveState>("clean")
   const [saveError, setSaveError] = React.useState<string>()
   const [outline, setOutline] = React.useState<OutlineEntry[]>([])
+  const [contextSection, setContextSection] =
+    React.useState<DocumentContextSectionId>("outline")
   const [metrics, setMetrics] = React.useState<DocumentMetrics>({
     words: 0,
     characters: 0,
@@ -339,9 +343,10 @@ export function DocumentWorkspace({
 
   useRegisterContextPanel({
     header: { title: "Document", description: title || "Untitled document" },
-    collapsedIcon: <ListTree />,
     body: (
       <DocumentContextPanel
+        activeSection={contextSection}
+        onActiveSectionChange={setContextSection}
         outline={outline}
         properties={properties}
         related={related}

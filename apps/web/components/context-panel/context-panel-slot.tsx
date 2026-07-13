@@ -18,8 +18,6 @@ export interface ContextPanelSlotHeader {
 export interface ContextPanelSlot {
   header: ContextPanelSlotHeader
   body: React.ReactNode
-  /** Rendered in the collapsed icon rail instead of the generic section icons. */
-  collapsedIcon?: React.ReactNode
 }
 
 // Internal only — never exposed outside this module. Pairs a registrant's
