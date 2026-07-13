@@ -32,7 +32,7 @@ export function ThemeScopeProvider({
   return (
     <div
       style={style}
-      className={cn("flex size-full flex-1", className)}
+      className={cn("flex size-full flex-1 flex-col", className)}
       data-theme-scope={scopeType}
       data-theme-scope-id={scopeId}
       data-theme-source={isExplicitTheme ? "explicit" : "inherited"}

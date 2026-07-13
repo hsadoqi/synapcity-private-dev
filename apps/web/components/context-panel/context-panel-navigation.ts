@@ -2,24 +2,27 @@ import { BookOpen, Bot, Settings2, SquareTerminal } from "lucide-react"
 
 export const contextPanelNavigationSections = [
   {
-    title: "Dashboard",
+    label: "Dashboard",
     icon: SquareTerminal,
     isActive: true,
     items: ["Overview", "Analytics", "Reports"],
   },
   {
-    title: "AI Tools",
+    label: "AI Tools",
     icon: Bot,
+    isActive: true,
     items: ["Assistant", "Models"],
   },
   {
-    title: "Documentation",
+    label: "Documentation",
     icon: BookOpen,
+    isActive: false,
     items: ["Getting Started", "API Reference", "Guides"],
   },
   {
-    title: "Settings",
+    label: "Settings",
     icon: Settings2,
+    isActive: false,
     items: ["Profile", "Preferences"],
   },
 ]

@@ -10,15 +10,26 @@ import { usePathname } from "next/navigation"
 
 import { getAppRouteContext, type AppRouteContext } from "@/modules/routing"
 import { AppGlobalActions } from "@/app/(home)/_components/header/header-actions"
+import { loadDashboardById } from "@/modules/dashboards/services/dashboard-data"
+import { loadDocumentById } from "@/modules/documents/services/document-data"
 
 function formatEntityLabel(routeContext: AppRouteContext) {
   if (!routeContext.entityId) return routeContext.title
+  let foundEntity = null
 
-  return routeContext.entityId
-    .split("-")
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ")
+  if (routeContext.entityType === "dashboard") {
+    foundEntity = loadDashboardById(routeContext.entityId)
+  } else if (routeContext.entityType === "document") {
+    foundEntity = loadDocumentById(routeContext.entityId)
+  }
+  return (
+    foundEntity?.title ??
+    routeContext.entityId
+      .split("-")
+      .filter(Boolean)
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(" ")
+  )
 }
 
 function HeaderBreadcrumbs({

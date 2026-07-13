@@ -41,7 +41,6 @@ import {
   deriveRelatedDocuments,
 } from "./document-context-panel-data"
 import { DocumentEditorSurface } from "./document-editor-surface"
-import { DocumentHeader } from "./document-header"
 import { DocumentRuler } from "./document-ruler-header"
 import { DocumentSpine, DocumentSpineHeader } from "./document-spine"
 import type { DocumentSaveState } from "./document-status"
@@ -102,7 +101,7 @@ export function DocumentWorkspace({
     initialDocument?.title ?? "Untitled document"
   )
   const [saveState, setSaveState] = React.useState<DocumentSaveState>("clean")
-  const [saveError, setSaveError] = React.useState<string>()
+  const [_saveError, setSaveError] = React.useState<string>()
   const [outline, setOutline] = React.useState<OutlineEntry[]>([])
   const [contextSection, setContextSection] =
     React.useState<DocumentContextSectionId>("outline")
@@ -110,7 +109,8 @@ export function DocumentWorkspace({
     words: 0,
     characters: 0,
   })
-  const [blockType, setBlockType] = React.useState<DocumentBlockType>("Paragraph")
+  const [blockType, setBlockType] =
+    React.useState<DocumentBlockType>("Paragraph")
   const [zoomPercent, setZoomPercent] = useDocumentPreference({
     documentId,
     key: "zoom",
@@ -136,7 +136,9 @@ export function DocumentWorkspace({
 
   React.useEffect(() => {
     const handleFullscreenChange = () => {
-      setIsFullscreen(window.document.fullscreenElement === workspaceRef.current)
+      setIsFullscreen(
+        window.document.fullscreenElement === workspaceRef.current
+      )
     }
     window.document.addEventListener("fullscreenchange", handleFullscreenChange)
     return () =>
@@ -257,36 +259,30 @@ export function DocumentWorkspace({
     }
   }, [documentId])
 
-  const handleContentChanged = React.useCallback(
-    (editorState: EditorState) => {
-      liveSnapshotRef.current.editorState = editorState
-      const nextMetrics = deriveMetrics(editorState)
-      setMetrics((previous) =>
-        areMetricsEqual(previous, nextMetrics) ? previous : nextMetrics
-      )
-      const nextOutline = deriveOutline(editorState)
-      setOutline((previous) =>
-        areOutlinesEqual(previous, nextOutline) ? previous : nextOutline
-      )
-    },
-    []
-  )
+  const handleContentChanged = React.useCallback((editorState: EditorState) => {
+    liveSnapshotRef.current.editorState = editorState
+    const nextMetrics = deriveMetrics(editorState)
+    setMetrics((previous) =>
+      areMetricsEqual(previous, nextMetrics) ? previous : nextMetrics
+    )
+    const nextOutline = deriveOutline(editorState)
+    setOutline((previous) =>
+      areOutlinesEqual(previous, nextOutline) ? previous : nextOutline
+    )
+  }, [])
 
-  const handleGenuineEdit = React.useCallback(
-    (editorState: EditorState) => {
-      liveSnapshotRef.current.editorState = editorState
-      coordinatorRef.current?.schedule()
-    },
-    []
-  )
-
+  const handleGenuineEdit = React.useCallback((editorState: EditorState) => {
+    liveSnapshotRef.current.editorState = editorState
+    coordinatorRef.current?.schedule()
+  }, [])
+  // TODO: Add functionality to properties section in context panel
   const handleTitleChange = (value: string) => {
     liveSnapshotRef.current.title = value
     setTitle(value)
     // A real user edit; the coordinator no-ops while paused (read-only).
     coordinatorRef.current?.schedule()
   }
-
+  // TODO: Add functionality to properties section in context panel
   const handleToggleReadOnly = () => {
     const nextReadOnly = !isReadOnly
     const coordinator = coordinatorRef.current
@@ -370,7 +366,7 @@ export function DocumentWorkspace({
           } as React.CSSProperties
         }
       >
-        <DocumentHeader
+        {/* <DocumentHeader
           title={title}
           onTitleChange={handleTitleChange}
           updatedAt={document?.updatedAt ?? new Date().toISOString()}
@@ -379,7 +375,7 @@ export function DocumentWorkspace({
           isCompact={isEditorFocused}
           isReadOnly={isReadOnly}
           onToggleReadOnly={handleToggleReadOnly}
-        />
+        /> */}
 
         <DocumentEditorSurface
           document={{ id: documentId, title }}
@@ -419,8 +415,10 @@ export function DocumentWorkspace({
                 percent: zoomPercent,
                 canDecrease: zoomPercent > MIN_ZOOM_PERCENT,
                 canIncrease: zoomPercent < MAX_ZOOM_PERCENT,
-                onDecrease: () => setZoomPercent(zoomPercent - ZOOM_STEP_PERCENT),
-                onIncrease: () => setZoomPercent(zoomPercent + ZOOM_STEP_PERCENT),
+                onDecrease: () =>
+                  setZoomPercent(zoomPercent - ZOOM_STEP_PERCENT),
+                onIncrease: () =>
+                  setZoomPercent(zoomPercent + ZOOM_STEP_PERCENT),
                 onReset: () => setZoomPercent(DEFAULT_ZOOM_PERCENT),
               }}
               fullscreen={{

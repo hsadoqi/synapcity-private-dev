@@ -21,7 +21,7 @@ export function ContextPanelContent() {
           <div className="flex flex-col gap-1">
             {contextPanelNavigationSections.map((item) => (
               <Collapsible
-                key={item.title}
+                key={item.label}
                 defaultOpen={item.isActive}
                 className="group/context-section"
               >
@@ -30,11 +30,8 @@ export function ContextPanelContent() {
                     variant="ghost"
                     className="w-full justify-start px-2 text-muted-foreground hover:text-foreground data-[state=open]:text-foreground"
                   >
-                    <item.icon
-                      data-icon="inline-start"
-                      aria-hidden="true"
-                    />
-                    <span>{item.title}</span>
+                    <item.icon data-icon="inline-start" aria-hidden="true" />
+                    <span>{item.label}</span>
                     <ChevronRight
                       className="ml-auto transition-transform duration-200 group-data-[state=open]/context-section:rotate-90 motion-reduce:transition-none"
                       aria-hidden="true"

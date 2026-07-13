@@ -88,7 +88,7 @@ export function DocumentDetailPage({
   }
 
   return (
-    <div className="flex min-h-0 flex-1 justify-center overflow-hidden p-4 md:p-8 xl:p-10">
+    <div className="flex min-h-0 flex-1 justify-center overflow-hidden">
       <div className="flex min-h-0 w-full max-w-5xl flex-1 flex-col overflow-hidden">
         <DocumentWorkspace
           key={documentId}

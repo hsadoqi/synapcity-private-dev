@@ -79,17 +79,20 @@ export function DocumentContextPanel({
           className="w-full"
           aria-label="Document panel section"
         >
-          {DOCUMENT_CONTEXT_SECTIONS.map((section) => (
-            <ToggleGroupItem
-              key={section.id}
-              value={section.id}
-              aria-label={section.label}
-              className="flex-1 gap-1.5"
-            >
-              <section.icon className="size-3.5" aria-hidden="true" />
-              <span className="hidden sm:inline">{section.label}</span>
-            </ToggleGroupItem>
-          ))}
+          {DOCUMENT_CONTEXT_SECTIONS.map((section) => {
+            const Icon = section.icon
+            return (
+              <ToggleGroupItem
+                key={section.id}
+                value={section.id}
+                aria-label={section.label}
+                className="flex-1 gap-1.5"
+              >
+                <Icon className="size-3.5" aria-hidden="true" />
+                <span className="hidden sm:inline">{section.label}</span>
+              </ToggleGroupItem>
+            )
+          })}
         </ToggleGroup>
       </div>
 
@@ -237,8 +240,8 @@ function PropertiesTab({ entries }: { entries: PropertyEntry[] }) {
       <div className="mt-1 flex items-start gap-2 border-t pt-3 text-xs text-muted-foreground">
         <Hash className="mt-0.5 size-3 shrink-0" aria-hidden="true" />
         <span>
-          Theme assignment and richer properties arrive alongside the
-          document data model rework.
+          Theme assignment and richer properties arrive alongside the document
+          data model rework.
         </span>
       </div>
     </dl>

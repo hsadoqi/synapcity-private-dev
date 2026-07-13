@@ -55,8 +55,9 @@ type SetContextPanelRegistration = React.Dispatch<
 // itself. Only the actual display consumers (`useContextPanelSlot`, used by
 // the desktop panel and mobile sheet) subscribe to the derived slot value,
 // and the registration identity (`id`) never leaks out to them at all.
-const ContextPanelSlotValueContext =
-  React.createContext<ContextPanelSlot | null | undefined>(undefined)
+const ContextPanelSlotValueContext = React.createContext<
+  ContextPanelSlot | null | undefined
+>(undefined)
 const ContextPanelSlotSetterContext = React.createContext<
   SetContextPanelRegistration | undefined
 >(undefined)

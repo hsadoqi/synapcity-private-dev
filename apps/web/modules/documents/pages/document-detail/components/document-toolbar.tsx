@@ -4,11 +4,15 @@ import * as React from "react"
 import {
   Bold,
   Code,
+  Heading1,
+  Heading2,
+  Heading3,
   Italic,
   List,
   ListOrdered,
   Quote,
   Strikethrough,
+  Type,
   Underline,
 } from "lucide-react"
 import {
@@ -40,13 +44,17 @@ import { cn } from "@workspace/ui/lib/utils"
 
 import { useActiveEditor } from "@/modules/documents/editor/active-editor-context"
 
-const BLOCK_TYPES: { id: string; label: string; tag: HeadingTagType | null }[] =
-  [
-    { id: "paragraph", label: "P", tag: null },
-    { id: "h1", label: "H1", tag: "h1" },
-    { id: "h2", label: "H2", tag: "h2" },
-    { id: "h3", label: "H3", tag: "h3" },
-  ]
+const BLOCK_TYPES: {
+  id: string
+  label: string
+  tag: HeadingTagType | null
+  icon: React.ComponentType
+}[] = [
+  { id: "h1", label: "Heading 1", tag: "h1", icon: Heading1 },
+  { id: "h2", label: "Heading 2", tag: "h2", icon: Heading2 },
+  { id: "h3", label: "Heading 3", tag: "h3", icon: Heading3 },
+  { id: "paragraph", label: "Text", tag: null, icon: Type },
+]
 
 /**
  * Interim toolbar between the editor swap and the Phase-5 floating
@@ -105,15 +113,14 @@ export function DocumentToolbar({ isFocused }: { isFocused: boolean }) {
     >
       <div className="flex items-center gap-0.5">
         {BLOCK_TYPES.map((type) => (
-          <ToolbarButton
+          <ToolbarIconButton
             key={type.id}
             label={type.label}
-            wide
             disabled={disabled}
             onClick={() => setBlockType(type.tag)}
           >
-            {type.label}
-          </ToolbarButton>
+            <type.icon />
+          </ToolbarIconButton>
         ))}
       </div>
 
@@ -216,35 +223,35 @@ function ToolbarIconButton({
   )
 }
 
-function ToolbarButton({
-  label,
-  onClick,
-  wide,
-  disabled,
-  children,
-}: {
-  label: string
-  onClick: () => void
-  wide?: boolean
-  disabled?: boolean
-  children: React.ReactNode
-}) {
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          aria-label={label}
-          disabled={disabled}
-          onClick={onClick}
-          className={cn("text-xs", wide && "px-2")}
-        >
-          {children}
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>{label}</TooltipContent>
-    </Tooltip>
-  )
-}
+// function ToolbarButton({
+//   label,
+//   onClick,
+//   wide,
+//   disabled,
+//   children,
+// }: {
+//   label: string
+//   onClick: () => void
+//   wide?: boolean
+//   disabled?: boolean
+//   children: React.ReactNode
+// }) {
+//   return (
+//     <Tooltip>
+//       <TooltipTrigger asChild>
+//         <Button
+//           type="button"
+//           variant="ghost"
+//           size="sm"
+//           aria-label={label}
+//           disabled={disabled}
+//           onClick={onClick}
+//           className={cn("text-xs", wide && "px-2")}
+//         >
+//           {children}
+//         </Button>
+//       </TooltipTrigger>
+//       <TooltipContent>{label}</TooltipContent>
+//     </Tooltip>
+//   )
+// }

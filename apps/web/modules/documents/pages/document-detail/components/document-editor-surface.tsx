@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { Eye } from "lucide-react"
 
 import { cn } from "@workspace/ui/lib/utils"
 import type { DocumentRecord } from "@/modules/documents/types"
@@ -49,24 +48,24 @@ export function DocumentEditorSurface({
   return (
     <div
       className={cn(
-        "flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border bg-card transition-colors duration-200 ease-out",
+        "flex min-h-0 flex-1 flex-col overflow-hidden transition-colors duration-200 ease-out",
         isFocused ? "border-ring/60" : "border-border",
         className
       )}
       data-document-id={document.id}
     >
-      {isReadOnly && (
+      {/* {isReadOnly && (
         <div className="flex items-center gap-2 rounded-t-xl border-b bg-muted/40 px-4 py-2 text-xs text-muted-foreground">
           <Eye className="size-3.5" aria-hidden="true" />
           Viewing only. Switch to editing to make changes.
         </div>
-      )}
+      )} */}
 
       {toolbar && !isReadOnly && toolbar}
 
       <div className="flex min-h-0 flex-1">
         {spineNav && (
-          <div className="flex shrink-0 flex-col">
+          <div className="flex shrink-0 flex-col gap-4">
             {spineHeader}
             {spineNav}
           </div>
@@ -74,11 +73,11 @@ export function DocumentEditorSurface({
 
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           {ruler}
-          <div className="relative mx-auto min-h-0 w-full max-w-(--editor-max-width) flex-1 overflow-hidden">
+          <div className="relative mx-auto mt-8 min-h-0 w-full max-w-(--editor-max-width) flex-1 overflow-hidden">
             <div
               aria-disabled={isReadOnly}
               className={cn(
-                "absolute inset-0 no-scrollbar overflow-y-auto overscroll-contain px-6 py-8 md:px-10 md:py-10",
+                "absolute inset-0 no-scrollbar scroll-fade-y overflow-y-auto overscroll-contain px-6 py-8 md:px-10 md:py-10",
                 isReadOnly && "opacity-70"
               )}
             >
