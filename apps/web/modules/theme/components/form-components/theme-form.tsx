@@ -54,7 +54,6 @@ export function ThemeForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {/* Name & Description */}
       <div className="space-y-3">
         <div>
           <label className="text-xs font-medium tracking-wide text-muted-foreground uppercase">

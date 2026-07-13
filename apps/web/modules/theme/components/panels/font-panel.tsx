@@ -12,25 +12,18 @@ interface FontPanelProps {
     value: ThemeFormData[K]
   ) => void
   defaultFormData: ThemeFormData
-  hideLabel?: boolean;
-  label?: string;
 }
 
 export function FontPanel({
-  label,
-  hideLabel,
   formData,
   onChange,
   defaultFormData,
 }: FontPanelProps) {
   return (
     <FontPickerCard
-      label={label}
-      hideLabel={hideLabel}
       data={formData}
       defaultData={defaultFormData}
       onChange={onChange}
-      showCard={false}
     />
   )
 }

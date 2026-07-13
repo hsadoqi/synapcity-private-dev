@@ -24,7 +24,6 @@ describe("FontPickerCard", () => {
           data={formData}
           defaultData={formData}
           onChange={vi.fn()}
-          showCard={false}
         />
       </form>
     )

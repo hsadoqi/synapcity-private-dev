@@ -6,6 +6,7 @@ import { hexToOklch } from "@/modules/theme/color-utils"
 import { FONT_OPTIONS } from "@/modules/theme/constants"
 import { buildThemeVariables } from "@/modules/theme/theme-engine"
 import {
+  SheetClose,
   SheetDescription,
   SheetHeader,
   SheetTitle,
@@ -13,13 +14,14 @@ import {
 
 import { ColorsPanel, DesignPanel, FontPanel } from "../panels"
 import { ThemeFormSectionHeader } from "./theme-form-section-header"
-import { CornerDownRight, Pipette, Type } from "lucide-react"
+import { CornerDownRight, Pipette, Text } from "lucide-react"
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-  Separator,
-} from "@workspace/ui/components"
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@workspace/ui/components/primitives/accordion"
+import { Button, Input, Label, Textarea } from "@workspace/ui/components"
 
 interface ThemeFormData {
   primaryColor: string
@@ -159,11 +161,35 @@ export function ThemeFormSheet({
 
   if (!isOpen) return null
 
+  const items = [
+    {
+      label: "Colors",
+      icon: Pipette,
+      panel: ColorsPanel,
+    },
+    {
+      label: "Typography",
+      icon: Text,
+      panel: FontPanel,
+    },
+    {
+      label: "Shape",
+      icon: CornerDownRight,
+      panel: DesignPanel,
+    },
+  ]
+
+  const panelProps = {
+    formData: formData,
+    onChange: handleChange,
+    defaultFormData: DEFAULT_FORM_DATA,
+  }
+
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <SheetHeader className="border-b border-border pr-10">
+      <SheetHeader className="flex items-center justify-between border-b border-border">
         <SheetTitle>Theme Builder</SheetTitle>
-        <SheetDescription>{""}</SheetDescription>
+        <SheetClose />
       </SheetHeader>
 
       <form
@@ -172,48 +198,33 @@ export function ThemeFormSheet({
       >
         {step === "design" ? (
           <div className="flex flex-col gap-4">
-            <Collapsible>
-              <CollapsibleTrigger className="w-full">
-                <ThemeFormSectionHeader label="Colors" icon={Pipette} />
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <ColorsPanel
-                  formData={formData}
-                  onChange={handleChange}
-                  defaultFormData={DEFAULT_FORM_DATA}
-                />
-              </CollapsibleContent>
-            </Collapsible>
-            <Separator orientation="horizontal" />
-            <Collapsible>
-              <CollapsibleTrigger className="w-full">
-                <ThemeFormSectionHeader label="Typography" icon={Type} />
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <FontPanel
-                  label="Typography"
-                  formData={formData}
-                  hideLabel={false}
-                  onChange={handleChange}
-                  defaultFormData={DEFAULT_FORM_DATA}
-                />
-              </CollapsibleContent>
-            </Collapsible>
-            <Separator orientation="horizontal" />
-            <Collapsible>
-              <CollapsibleTrigger className="w-full">
-                <ThemeFormSectionHeader label="Shape" icon={CornerDownRight} />
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <DesignPanel formData={formData} onChange={handleChange} />
-              </CollapsibleContent>
-            </Collapsible>
+            <Accordion type="single">
+              {items.map((item) => {
+                const Panel = item.panel
+                return (
+                  <AccordionItem
+                    key={item.label}
+                    value={item.label.toLowerCase()}
+                  >
+                    <AccordionTrigger role="button">
+                      <ThemeFormSectionHeader
+                        label={item.label}
+                        icon={item.icon}
+                      />
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <Panel {...panelProps} />
+                    </AccordionContent>
+                  </AccordionItem>
+                )
+              })}
+            </Accordion>
           </div>
         ) : (
           <div className="space-y-4">
-            <label className="block text-xs font-medium tracking-wide text-muted-foreground uppercase">
+            <Label className="block text-xs font-medium tracking-wide text-muted-foreground uppercase">
               Theme Name
-              <input
+              <Input
                 type="text"
                 placeholder="My Amazing Theme"
                 value={formData.name}
@@ -221,11 +232,11 @@ export function ThemeFormSheet({
                 className="mt-1.5 w-full rounded border border-border bg-input px-3 py-2 text-sm text-foreground normal-case focus:ring-2 focus:ring-ring/50 focus:outline-none"
                 autoFocus
               />
-            </label>
+            </Label>
 
-            <label className="block text-xs font-medium tracking-wide text-muted-foreground uppercase">
+            <Label className="block text-xs font-medium tracking-wide text-muted-foreground uppercase">
               Description
-              <textarea
+              <Textarea
                 placeholder="Describe your theme's purpose and style..."
                 value={formData.description}
                 onChange={(event) =>
@@ -234,33 +245,34 @@ export function ThemeFormSheet({
                 rows={4}
                 className="mt-1.5 w-full resize-none rounded border border-border bg-input px-3 py-2 text-sm text-foreground normal-case focus:ring-2 focus:ring-ring/50 focus:outline-none"
               />
-            </label>
+            </Label>
           </div>
         )}
 
         <div className="mt-6 flex gap-2 border-t border-border pt-6">
           {step === "identity" ? (
-            <button
-              type="button"
+            <Button
+              role="button"
               onClick={() => setStep("design")}
               className="flex-1 rounded bg-muted px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/80"
             >
               Back
-            </button>
+            </Button>
           ) : null}
-          <button
-            type="button"
+          <Button
+            role="button"
             onClick={onClose}
             className={`${step === "design" ? "flex-1" : ""} rounded bg-muted px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/80`}
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
+            role="button"
             type="submit"
             className="flex-1 rounded bg-primary px-3 py-2 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
             {step === "design" ? "Next" : "Apply"}
-          </button>
+          </Button>
         </div>
       </form>
     </div>

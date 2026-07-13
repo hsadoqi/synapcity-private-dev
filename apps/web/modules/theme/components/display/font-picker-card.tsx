@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Check, ChevronDown, Minus, Plus, Type } from "lucide-react"
+import { Check, ChevronDown, Minus, Plus } from "lucide-react"
 
 import {
   DropdownMenu,
@@ -9,7 +9,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/primitives/dropdown-menu"
-import { cn } from "@workspace/ui/lib/utils"
 
 import type { ThemeFormData } from "../form-components/theme-form-popover"
 import { FONT_OPTIONS } from "../../constants"
@@ -23,18 +22,12 @@ interface FontPickerCardProps {
     field: K,
     value: ThemeFormData[K]
   ) => void
-  showCard?: boolean
-  hideLabel?: boolean
-  label?: string;
 }
 
 export function FontPickerCard({
-  label, 
   data,
   onChange,
   defaultData,
-  showCard = true,
-  hideLabel=true
 }: FontPickerCardProps) {
   const [openField, setOpenField] = React.useState<FontField | null>(null)
 
@@ -89,21 +82,6 @@ export function FontPickerCard({
       />
     </div>
   )
-
-  // return  (
-  //     <div className={cn("relative p-2", showCard && "border border-border rounded-lg p-4 bg-card", !hideLabel && "border-t border-border mt-4")}>
-  //     {!hideLabel && (
-  //       <div className="my-4 flex items-center justify-between gap-2">
-  //       <h3 className="text-xs font-medium tracking-wider text-muted-foreground uppercase">
-  //         {label ?? "Font"}
-  //       </h3>
-
-  //       <Type aria-hidden="true" className="size-4 text-muted-foreground" />
-  //         </div>
-  //     )}
-  //       {content}
-  //   </div>
-  // )
 }
 
 interface FontSelectProps {

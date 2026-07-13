@@ -1,10 +1,7 @@
-import * as React from "react"
+import React from "react"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import {
-  Sheet,
-  SheetContent,
-} from "@workspace/ui/components/primitives/sheet"
+import { Sheet, SheetContent } from "@workspace/ui/components/primitives/sheet"
 
 import { ThemeFormSheet } from "./theme-form-sheet"
 
@@ -14,6 +11,7 @@ describe("ThemeFormSheet", () => {
     const onClose = vi.fn()
     const { unmount } = renderSheet({ onClose })
 
+    fireEvent.click(screen.getByRole("button", { name: "Colors" }))
     fireEvent.change(screen.getByLabelText("Primary hexadecimal value"), {
       target: { value: "#8B5CF6" },
     })
@@ -38,6 +36,7 @@ describe("ThemeFormSheet", () => {
     const onSubmit = vi.fn()
     renderSheet({ onSubmit })
 
+    fireEvent.click(screen.getByRole("button", { name: "Shape" }))
     fireEvent.click(screen.getByRole("button", { name: "full" }))
     expect(screen.getByLabelText("Border Radius")).toHaveValue("14")
     expect(screen.getByRole("button", { name: "full" })).toHaveAttribute(
