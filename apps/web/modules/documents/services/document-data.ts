@@ -2,15 +2,73 @@ import type { DocumentRecord } from "../types"
 
 const STORAGE_KEY = "synapcity.documents"
 
+// Seed content is stored in the versioned Lexical envelope format (see
+// modules/documents/editor/serialization.ts — the `format` literal below
+// must match LEXICAL_CONTENT_FORMAT there; pinned by a test rather than
+// an import so this service stays free of editor dependencies). The
+// legacy markdown-string reading path still exists for pre-existing user
+// localStorage, but nothing this module seeds relies on it.
+type SeedNode = Record<string, unknown>
+
+function seedText(text: string): SeedNode {
+  return {
+    detail: 0,
+    format: 0,
+    mode: "normal",
+    style: "",
+    text,
+    type: "text",
+    version: 1,
+  }
+}
+
+function seedBlock(
+  type: "paragraph" | "heading",
+  text: string,
+  tag?: "h1" | "h2" | "h3"
+): SeedNode {
+  return {
+    children: [seedText(text)],
+    direction: null,
+    format: "",
+    indent: 0,
+    type,
+    version: 1,
+    ...(tag ? { tag } : {}),
+  }
+}
+
+function seedEnvelope(blocks: SeedNode[]): string {
+  return JSON.stringify({
+    format: "synapcity.lexical",
+    version: 1,
+    editorState: {
+      root: {
+        children: blocks,
+        direction: null,
+        format: "",
+        indent: 0,
+        type: "root",
+        version: 1,
+      },
+    },
+  })
+}
+
 const seedDocuments: DocumentRecord[] = [
   {
     id: "doc-1",
     title: "Product vision",
     slug: "product-vision",
-    content:
-      "# Product vision\n\nDocument content is now editable from the route shell.",
+    content: seedEnvelope([
+      seedBlock("heading", "Product vision", "h1"),
+      seedBlock(
+        "paragraph",
+        "Document content is now editable from the route shell."
+      ),
+    ]),
     plainText:
-      "Product vision. Document content is now editable from the route shell.",
+      "Product vision Document content is now editable from the route shell.",
     summary: "Shared direction for the V0 product experience.",
     createdAt: "2026-01-01T09:00:00.000Z",
     updatedAt: "2026-01-01T09:00:00.000Z",
@@ -19,8 +77,11 @@ const seedDocuments: DocumentRecord[] = [
     id: "doc-2",
     title: "Design principles",
     slug: "design-principles",
-    content: "## Design principles\n\nKeep the experience calm and structured.",
-    plainText: "Design principles. Keep the experience calm and structured.",
+    content: seedEnvelope([
+      seedBlock("heading", "Design principles", "h2"),
+      seedBlock("paragraph", "Keep the experience calm and structured."),
+    ]),
+    plainText: "Design principles Keep the experience calm and structured.",
     summary: "A concise editorial reference for the product surface.",
     createdAt: "2026-01-02T09:00:00.000Z",
     updatedAt: "2026-01-02T09:00:00.000Z",

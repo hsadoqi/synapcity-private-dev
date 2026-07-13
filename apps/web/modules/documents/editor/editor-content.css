@@ -1,0 +1,146 @@
+/*
+ * Document-workspace editor styles — scoped per ADR-1.
+ *
+ * Every rule lives under `.document-workspace` (the DocumentWorkspace root
+ * element); every color derives from semantic tokens so scoped theme
+ * resolution recolors the editor with zero changes here. No global
+ * selectors, no raw colors, no `.dark` overrides.
+ */
+
+.document-workspace {
+  /* Editor-specific tokens (ADR-1) — derived, never invented. */
+  --editor-content-size: 0.9375rem; /* ~15px body, per plan §2.2 */
+  --editor-selection: color-mix(in oklch, var(--primary) 22%, transparent);
+  /* Fallback for first paint before the per-document column-width
+     preference hydrates from localStorage; DocumentWorkspace overrides
+     this inline once it does (see use-document-preference.ts). */
+  --editor-max-width: 720px;
+}
+
+.document-workspace .editor-content {
+  min-height: 20rem;
+  outline: none;
+  font-size: calc(var(--editor-content-size) * var(--editor-zoom, 1));
+  line-height: 1.75;
+  color: var(--foreground);
+  max-width: var(--editor-max-width);
+}
+
+.document-workspace .editor-content ::selection {
+  background: var(--editor-selection);
+}
+
+.document-workspace .editor-placeholder {
+  pointer-events: none;
+  user-select: none;
+  color: color-mix(in oklch, var(--muted-foreground) 70%, transparent);
+  font-size: var(--editor-content-size);
+  line-height: 1.75;
+}
+
+/* --- Blocks (§2.2 type scale) ------------------------------------- */
+
+.document-workspace .editor-p {
+  margin: 0.375rem 0;
+}
+
+.document-workspace .editor-h1 {
+  margin: 1.5rem 0 0.75rem;
+  font-size: calc(2.375rem * var(--editor-zoom, 1));
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.document-workspace .editor-h2 {
+  margin: 2rem 0 0.5rem;
+  font-size: calc(1.4375rem * var(--editor-zoom, 1));
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.document-workspace .editor-h3 {
+  margin: 1.5rem 0 0.375rem;
+  font-size: calc(1.125rem * var(--editor-zoom, 1));
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.document-workspace .editor-h1:first-child,
+.document-workspace .editor-h2:first-child,
+.document-workspace .editor-h3:first-child {
+  margin-top: 0;
+}
+
+.document-workspace .editor-quote {
+  margin: 0.75rem 0;
+  border-left: 2px solid var(--border);
+  padding-left: 1rem;
+  color: var(--muted-foreground);
+}
+
+.document-workspace .editor-hr {
+  margin: 2rem 0;
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+
+.document-workspace .editor-hr.selected {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.document-workspace .editor-ul,
+.document-workspace .editor-ol {
+  margin: 0.375rem 0;
+  padding-left: 1.5rem;
+}
+
+.document-workspace .editor-li {
+  margin: 0.25rem 0;
+}
+
+.document-workspace .editor-li::marker {
+  color: var(--muted-foreground);
+}
+
+.document-workspace .editor-li-nested {
+  list-style: none;
+}
+
+/* --- Inline ---------------------------------------------------------- */
+
+.document-workspace .editor-link {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.document-workspace .editor-text-bold {
+  font-weight: 600;
+}
+
+.document-workspace .editor-text-italic {
+  font-style: italic;
+}
+
+.document-workspace .editor-text-underline {
+  text-decoration: underline;
+}
+
+.document-workspace .editor-text-strikethrough {
+  text-decoration: line-through;
+}
+
+.document-workspace .editor-text-underline-strikethrough {
+  text-decoration: underline line-through;
+}
+
+.document-workspace .editor-text-code {
+  border-radius: 4px;
+  background: var(--muted);
+  padding: 0.1em 0.35em;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.85em;
+}
