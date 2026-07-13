@@ -117,6 +117,7 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --font-sans: var(--font-sans);
   --font-heading: var(--font-heading);
+  --font-mono: var(--font-mono);
 }
 
 @layer base {
@@ -134,6 +135,9 @@
   }
 }
 
+@utility no-scrollbar {
+  @apply [scrollbar-width:none] [&::-webkit-scrollbar]:hidden;
+}
 /* 
 :root {
   --neutral-50: oklch(98.4% 0.003 247.858);

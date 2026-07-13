@@ -83,7 +83,7 @@ export function NavigationFeedback() {
     <div
       role="status"
       aria-live="polite"
-      className="pointer-events-none fixed inset-x-0 top-0 z-[100] h-1 overflow-hidden bg-primary/15"
+      className="pointer-events-none fixed inset-x-0 top-0 z-100 h-1 overflow-hidden bg-primary/15"
     >
       <span className="sr-only">Loading page</span>
       <span className="block h-full w-1/2 animate-pulse bg-primary shadow-[0_0_12px_var(--primary)] motion-reduce:w-full motion-reduce:animate-none" />

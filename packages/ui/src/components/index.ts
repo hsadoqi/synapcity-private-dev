@@ -1,3 +1,4 @@
+export * from './primitives/accordion';
 export * from './primitives/avatar';
 export * from './primitives/breadcrumb';
 export * from './primitives/button';
@@ -21,6 +22,7 @@ export * from './primitives/textarea';
 export * from './primitives/toggle-group';
 export * from './primitives/toggle';
 export * from './primitives/tooltip';
+export * from './reui/tree';
 export * from './patterns/states/empty-state';
 export * from './patterns/states/error-state';
 export * from './patterns/states/loading-state';
