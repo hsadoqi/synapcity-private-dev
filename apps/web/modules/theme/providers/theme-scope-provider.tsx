@@ -21,25 +21,17 @@ export function ThemeScopeProvider({
   children,
   className,
 }: ThemeScopeProviderProps) {
-  const containerRef = React.useRef<HTMLDivElement>(null)
-
-  React.useEffect(() => {
-    const target = containerRef.current
-
-    if (theme) {
-      const cssVars = buildThemeVariables(theme.primaryOklch, theme.accentOklch)
-
-      Object.entries(cssVars).forEach(([name, value]) => {
-        target?.style.setProperty(name, value)
-      })
-    }
-  }, [theme])
-
   const isExplicitTheme = Boolean(theme)
+  const style = theme
+    ? (buildThemeVariables(
+        theme.primaryOklch,
+        theme.accentOklch
+      ) as React.CSSProperties)
+    : undefined
 
   return (
     <div
-      ref={containerRef}
+      style={style}
       className={cn("flex flex-1", className)}
       data-theme-scope={scopeType}
       data-theme-scope-id={scopeId}

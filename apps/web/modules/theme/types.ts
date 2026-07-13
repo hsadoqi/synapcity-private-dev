@@ -28,3 +28,31 @@ export const DEFAULT_THEME_RECORD: ThemeRecord = {
   createdAt: "2026-01-01T00:00:00.000Z",
   updatedAt: "2026-01-01T00:00:00.000Z",
 }
+
+
+export interface RGBColor {
+  r: number
+  g: number
+  b: number
+}
+
+export interface OKLCHColor {
+  l: number
+  c: number
+  h: number
+}
+
+export type ShadeName = 50 | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900 | 950
+
+export interface ColorShade {
+  name: ShadeName
+  hex: string
+  oklch: OKLCHColor
+}
+
+export type FontField = "headingFont" | "bodyFont"
+export interface FontOption {
+  label: string
+  value: string
+  fontFamily: string
+}
