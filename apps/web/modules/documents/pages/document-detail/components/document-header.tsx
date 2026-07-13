@@ -32,7 +32,6 @@ interface DocumentHeaderProps {
   title: string
   onTitleChange: (title: string) => void
   updatedAt: string
-  wordCount: number
   saveState: DocumentSaveState
   saveError?: string
   /** True once the editor canvas has focus — the header quiets down. */
@@ -50,7 +49,6 @@ export function DocumentHeader({
   title,
   onTitleChange,
   updatedAt,
-  wordCount,
   saveState,
   saveError,
   isCompact,
@@ -90,7 +88,7 @@ export function DocumentHeader({
 
           <div className="min-w-0 flex-1">
             <label className="sr-only" htmlFor="document-title-input">
-              Document title
+              {title}
             </label>
             <input
               id="document-title-input"
@@ -115,7 +113,9 @@ export function DocumentHeader({
                 type="button"
                 variant={isReadOnly ? "secondary" : "ghost"}
                 size="icon-sm"
-                aria-label={isReadOnly ? "Switch to editing" : "Switch to viewing"}
+                aria-label={
+                  isReadOnly ? "Switch to editing" : "Switch to viewing"
+                }
                 aria-pressed={isReadOnly}
                 onClick={onToggleReadOnly}
               >
@@ -123,7 +123,9 @@ export function DocumentHeader({
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              {isReadOnly ? "Viewing — click to edit" : "Editing — click to view"}
+              {isReadOnly
+                ? "Viewing — click to edit"
+                : "Editing — click to view"}
             </TooltipContent>
           </Tooltip>
           <DropdownMenu>
@@ -177,13 +179,12 @@ export function DocumentHeader({
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
         <span>
           Updated{" "}
-          {new Date(updatedAt).toLocaleDateString(undefined, {
+          {new Date(updatedAt).toLocaleDateString("en-US", {
             month: "short",
             day: "numeric",
+            timeZone: "UTC",
           })}
         </span>
-        <span aria-hidden="true">·</span>
-        <span>{wordCount} words</span>
         {/* Single instance, single live region — deliberately not duplicated
             per breakpoint (an earlier version rendered this twice, hidden
             via responsive classes; screen readers shouldn't have to guess

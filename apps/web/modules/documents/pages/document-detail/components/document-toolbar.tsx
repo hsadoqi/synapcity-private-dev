@@ -5,13 +5,29 @@ import {
   Bold,
   Code,
   Italic,
-  Link2,
   List,
   ListOrdered,
   Quote,
   Strikethrough,
   Underline,
 } from "lucide-react"
+import {
+  $createParagraphNode,
+  $getSelection,
+  $isRangeSelection,
+  FORMAT_TEXT_COMMAND,
+  type TextFormatType,
+} from "lexical"
+import {
+  INSERT_ORDERED_LIST_COMMAND,
+  INSERT_UNORDERED_LIST_COMMAND,
+} from "@lexical/list"
+import {
+  $createHeadingNode,
+  $createQuoteNode,
+  type HeadingTagType,
+} from "@lexical/rich-text"
+import { $setBlocksType } from "@lexical/selection"
 
 import {
   Button,
@@ -22,66 +38,70 @@ import {
 } from "@workspace/ui/components"
 import { cn } from "@workspace/ui/lib/utils"
 
-import type { DocumentEditorPlaceholderHandle } from "./document-editor-placeholder"
-import {
-  applyBlockPrefix,
-  insertLink,
-  toggleInlineMark,
-  toggleLinePrefix,
-  type TextEdit,
-} from "./document-toolbar-actions"
+import { useActiveEditor } from "@/modules/documents/editor/active-editor-context"
 
-const BLOCK_TYPES = [
-  { id: "paragraph", label: "Text", prefix: "" },
-  { id: "h1", label: "Heading 1", prefix: "# " },
-  { id: "h2", label: "Heading 2", prefix: "## " },
-  { id: "h3", label: "Heading 3", prefix: "### " },
-] as const
-
-interface DocumentToolbarProps {
-  isFocused: boolean
-  value: string
-  onChange: (value: string) => void
-  editorRef: React.RefObject<DocumentEditorPlaceholderHandle | null>
-}
+const BLOCK_TYPES: { id: string; label: string; tag: HeadingTagType | null }[] =
+  [
+    { id: "paragraph", label: "P", tag: null },
+    { id: "h1", label: "H1", tag: "h1" },
+    { id: "h2", label: "H2", tag: "h2" },
+    { id: "h3", label: "H3", tag: "h3" },
+  ]
 
 /**
- * Every control here performs a real edit against the plain-text prototype
- * content (via `document-toolbar-actions.ts` and the editor placeholder's
- * selection handle) — none of them are decorative. What they do not do is
- * reflect live selection state (e.g. highlighting "Bold" when the caret sits
- * inside already-bold text), since that requires continuous selection
- * tracking a real editor provides for free.
- * TODO(lexical-integration): replace these string-splice actions with the
- * editor's real formatting commands; this file and
- * `document-toolbar-actions.ts` should not survive that migration.
+ * Interim toolbar between the editor swap and the Phase-5 floating
+ * toolbar: every control dispatches a real Lexical command against the
+ * active editor. Still no live selection-state reflection (pressed
+ * "Bold" when the caret is in bold text) — that arrives with the
+ * floating toolbar's selection tracking, same as before the swap.
+ *
+ * No link button: real link insertion needs URL-input UI, which is
+ * Phase-5 scope (the markdown `[label](url)` shortcut still works).
  */
-export function DocumentToolbar({
-  isFocused,
-  value,
-  onChange,
-  editorRef,
-}: DocumentToolbarProps) {
-  const applyEdit = (edit: TextEdit) => {
-    onChange(edit.value)
-    requestAnimationFrame(() => {
-      editorRef.current?.setSelection(edit.selectionStart, edit.selectionEnd)
-    })
+export function DocumentToolbar({ isFocused }: { isFocused: boolean }) {
+  const editor = useActiveEditor()
+  const disabled = editor === null
+
+  const run = (mutate: () => void) => {
+    if (!editor) return
+    mutate()
+    editor.focus()
   }
 
-  const withSelection = (transform: (start: number, end: number) => TextEdit) => {
-    const selection = editorRef.current?.getSelection() ?? { start: 0, end: 0 }
-    applyEdit(transform(selection.start, selection.end))
-  }
+  const setBlockType = (tag: HeadingTagType | null) =>
+    run(() =>
+      editor?.update(() => {
+        const selection = $getSelection()
+        if (!$isRangeSelection(selection)) return
+        $setBlocksType(selection, () =>
+          tag ? $createHeadingNode(tag) : $createParagraphNode()
+        )
+      })
+    )
+
+  const setQuote = () =>
+    run(() =>
+      editor?.update(() => {
+        const selection = $getSelection()
+        if (!$isRangeSelection(selection)) return
+        $setBlocksType(selection, () => $createQuoteNode())
+      })
+    )
+
+  const formatText = (format: TextFormatType) =>
+    run(() => editor?.dispatchCommand(FORMAT_TEXT_COMMAND, format))
 
   return (
     <div
       className={cn(
-        "sticky top-0 z-10 flex items-center gap-1 overflow-x-auto rounded-t-xl border-b bg-background/95 px-2 py-1.5 backdrop-blur transition-opacity duration-200 ease-out supports-backdrop-filter:bg-background/85",
+        "sticky top-0 z-10 no-scrollbar flex items-center gap-1 overflow-x-auto overscroll-y-contain rounded-t-xl border-b bg-background/95 px-2 py-1.5 backdrop-blur transition-opacity duration-200 ease-out supports-backdrop-filter:bg-background/85",
         isFocused ? "opacity-100" : "opacity-60 hover:opacity-100"
       )}
       role="toolbar"
       aria-label="Formatting"
+      // Keep focus (and therefore the Lexical selection the commands
+      // target) inside the editor while clicking toolbar controls.
+      onMouseDown={(event) => event.preventDefault()}
     >
       <div className="flex items-center gap-0.5">
         {BLOCK_TYPES.map((type) => (
@@ -89,13 +109,8 @@ export function DocumentToolbar({
             key={type.id}
             label={type.label}
             wide
-            onClick={() => {
-              const selection = editorRef.current?.getSelection() ?? {
-                start: 0,
-                end: 0,
-              }
-              applyEdit(applyBlockPrefix(value, selection.start, type.prefix))
-            }}
+            disabled={disabled}
+            onClick={() => setBlockType(type.tag)}
           >
             {type.label}
           </ToolbarButton>
@@ -106,33 +121,36 @@ export function DocumentToolbar({
 
       <ToolbarIconButton
         label="Bold"
-        onClick={() => withSelection((s, e) => toggleInlineMark(value, s, e, "**"))}
+        disabled={disabled}
+        onClick={() => formatText("bold")}
       >
         <Bold />
       </ToolbarIconButton>
       <ToolbarIconButton
         label="Italic"
-        onClick={() => withSelection((s, e) => toggleInlineMark(value, s, e, "_"))}
+        disabled={disabled}
+        onClick={() => formatText("italic")}
       >
         <Italic />
       </ToolbarIconButton>
       <ToolbarIconButton
         label="Underline"
-        onClick={() =>
-          withSelection((s, e) => toggleInlineMark(value, s, e, "<u>", "</u>"))
-        }
+        disabled={disabled}
+        onClick={() => formatText("underline")}
       >
         <Underline />
       </ToolbarIconButton>
       <ToolbarIconButton
         label="Strikethrough"
-        onClick={() => withSelection((s, e) => toggleInlineMark(value, s, e, "~~"))}
+        disabled={disabled}
+        onClick={() => formatText("strikethrough")}
       >
         <Strikethrough />
       </ToolbarIconButton>
       <ToolbarIconButton
         label="Inline code"
-        onClick={() => withSelection((s, e) => toggleInlineMark(value, s, e, "`"))}
+        disabled={disabled}
+        onClick={() => formatText("code")}
       >
         <Code />
       </ToolbarIconButton>
@@ -141,9 +159,10 @@ export function DocumentToolbar({
 
       <ToolbarIconButton
         label="Bulleted list"
+        disabled={disabled}
         onClick={() =>
-          withSelection((s, e) =>
-            toggleLinePrefix(value, s, e, /^-\s/, () => "- ")
+          run(() =>
+            editor?.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined)
           )
         }
       >
@@ -151,33 +170,17 @@ export function DocumentToolbar({
       </ToolbarIconButton>
       <ToolbarIconButton
         label="Numbered list"
+        disabled={disabled}
         onClick={() =>
-          withSelection((s, e) =>
-            toggleLinePrefix(
-              value,
-              s,
-              e,
-              /^\d+\.\s/,
-              (lineIndex) => `${lineIndex + 1}. `
-            )
+          run(() =>
+            editor?.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined)
           )
         }
       >
         <ListOrdered />
       </ToolbarIconButton>
-      <ToolbarIconButton
-        label="Quote"
-        onClick={() =>
-          withSelection((s, e) => toggleLinePrefix(value, s, e, /^>\s/, () => "> "))
-        }
-      >
+      <ToolbarIconButton label="Quote" disabled={disabled} onClick={setQuote}>
         <Quote />
-      </ToolbarIconButton>
-      <ToolbarIconButton
-        label="Link"
-        onClick={() => withSelection((s, e) => insertLink(value, s, e))}
-      >
-        <Link2 />
       </ToolbarIconButton>
     </div>
   )
@@ -186,10 +189,12 @@ export function DocumentToolbar({
 function ToolbarIconButton({
   label,
   onClick,
+  disabled,
   children,
 }: {
   label: string
   onClick: () => void
+  disabled?: boolean
   children: React.ReactNode
 }) {
   return (
@@ -200,6 +205,7 @@ function ToolbarIconButton({
           variant="ghost"
           size="icon-sm"
           aria-label={label}
+          disabled={disabled}
           onClick={onClick}
         >
           {children}
@@ -214,11 +220,13 @@ function ToolbarButton({
   label,
   onClick,
   wide,
+  disabled,
   children,
 }: {
   label: string
   onClick: () => void
   wide?: boolean
+  disabled?: boolean
   children: React.ReactNode
 }) {
   return (
@@ -229,6 +237,7 @@ function ToolbarButton({
           variant="ghost"
           size="sm"
           aria-label={label}
+          disabled={disabled}
           onClick={onClick}
           className={cn("text-xs", wide && "px-2")}
         >

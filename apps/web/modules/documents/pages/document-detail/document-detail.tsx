@@ -7,25 +7,52 @@ import { FileQuestion } from "lucide-react"
 import { Button, ErrorState } from "@workspace/ui/components"
 import { DocumentWorkspace } from "./components/document-workspace"
 import { loadDocumentById } from "@/modules/documents/services/document-data"
+import type { DocumentRecord } from "@/modules/documents/types"
 
 interface DocumentDetailPageProps {
   documentId: string
+  initialDocument: DocumentRecord | null
 }
 
-export function DocumentDetailPage({ documentId }: DocumentDetailPageProps) {
-  const documentState = React.useMemo(() => {
+interface DocumentState {
+  document: DocumentRecord | null
+  status: "ready" | "error"
+}
+
+const subscribeToHydration = () => () => {}
+const getClientSnapshot = () => true
+const getServerSnapshot = () => false
+
+export function DocumentDetailPage({
+  documentId,
+  initialDocument,
+}: DocumentDetailPageProps) {
+  const isHydrated = React.useSyncExternalStore(
+    subscribeToHydration,
+    getClientSnapshot,
+    getServerSnapshot
+  )
+
+  const documentState = React.useMemo<DocumentState>(() => {
+    if (!isHydrated) {
+      return {
+        document: initialDocument,
+        status: "ready",
+      }
+    }
+
     try {
       return {
         document: loadDocumentById(documentId),
-        status: "ready" as const,
+        status: "ready",
       }
     } catch {
       return {
         document: null,
-        status: "error" as const,
+        status: "error",
       }
     }
-  }, [documentId])
+  }, [documentId, initialDocument, isHydrated])
 
   if (documentState.status === "error") {
     return (
@@ -61,8 +88,8 @@ export function DocumentDetailPage({ documentId }: DocumentDetailPageProps) {
   }
 
   return (
-    <div className="flex flex-1 justify-center p-4 md:p-8 xl:p-10">
-      <div className="flex w-full max-w-5xl flex-col">
+    <div className="flex min-h-0 flex-1 justify-center overflow-hidden p-4 md:p-8 xl:p-10">
+      <div className="flex min-h-0 w-full max-w-5xl flex-1 flex-col overflow-hidden">
         <DocumentWorkspace
           key={documentId}
           documentId={documentId}

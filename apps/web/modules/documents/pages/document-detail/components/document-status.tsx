@@ -1,3 +1,4 @@
+import * as React from "react"
 import { Loader2 } from "lucide-react"
 
 import { cn } from "@workspace/ui/lib/utils"
@@ -20,11 +21,6 @@ const STATUS_TONE: Record<DocumentSaveState, string> = {
   error: "text-destructive",
 }
 
-/**
- * A quiet, always-present status readout rather than a toast — saved state
- * should be legible without interrupting writing. Prototype state only;
- * driven by local mock state until real persistence lands.
- */
 export function DocumentStatus({
   state,
   error,
@@ -51,10 +47,7 @@ export function DocumentStatus({
         <Loader2 className="size-3 animate-spin" aria-hidden="true" />
       )}
       {state === "dirty" && (
-        <span
-          className="size-1.5 rounded-full bg-current"
-          aria-hidden="true"
-        />
+        <span className="size-1.5 rounded-full bg-current" aria-hidden="true" />
       )}
       <span>{STATUS_LABEL[state]}</span>
       {error && state === "error" && (

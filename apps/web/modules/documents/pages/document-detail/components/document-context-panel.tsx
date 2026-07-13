@@ -3,12 +3,22 @@
 import * as React from "react"
 import Link from "next/link"
 import { Hash, Link2, ListTree, SlidersHorizontal } from "lucide-react"
+import { hotkeysCoreFeature, syncDataLoaderFeature } from "@headless-tree/core"
+import { useTree } from "@headless-tree/react"
 
-import { ScrollArea, ToggleGroup, ToggleGroupItem } from "@workspace/ui/components"
-import { cn } from "@workspace/ui/lib/utils"
+import {
+  ScrollArea,
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@workspace/ui/components"
+import {
+  Tree,
+  TreeItem,
+  TreeItemLabel,
+} from "@workspace/ui/components/reui/tree"
 
+import type { OutlineEntry } from "@/modules/documents/editor/derive-outline"
 import type {
-  OutlineEntry,
   PropertyEntry,
   RelatedDocumentEntry,
 } from "./document-context-panel-data"
@@ -105,23 +115,104 @@ function OutlineTab({
   }
 
   return (
-    <nav aria-label="Document outline" className="flex flex-col gap-0.5">
-      {entries.map((entry) => (
-        <button
-          key={entry.id}
-          type="button"
-          onClick={() => onSelect(entry)}
-          className={cn(
-            "truncate rounded-none px-2 py-1.5 text-left text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
-            entry.depth === 1 && "font-medium text-foreground",
-            entry.depth === 2 && "ml-3",
-            entry.depth === 3 && "ml-6 text-xs"
-          )}
-        >
-          {entry.label}
-        </button>
-      ))}
+    <nav aria-label="Document outline">
+      <OutlineTree
+        key={getOutlineStructureKey(entries)}
+        entries={entries}
+        onSelect={onSelect}
+      />
     </nav>
+  )
+}
+
+interface OutlineTreeItemData {
+  name: string
+  children: string[]
+  entry?: OutlineEntry
+}
+
+const OUTLINE_ROOT_ID = "document-outline-root"
+
+function createOutlineTreeData(entries: OutlineEntry[]) {
+  const items: Record<string, OutlineTreeItemData> = {
+    [OUTLINE_ROOT_ID]: {
+      name: "Document outline",
+      children: entries.map((entry) => entry.nodeKey),
+    },
+  }
+  const expandedItems: string[] = []
+
+  const visit = (entry: OutlineEntry) => {
+    const children = entry.children.map((child) => child.nodeKey)
+    items[entry.nodeKey] = {
+      name: entry.label,
+      children,
+      entry,
+    }
+    if (children.length > 0) expandedItems.push(entry.nodeKey)
+    entry.children.forEach(visit)
+  }
+
+  entries.forEach(visit)
+  return { items, expandedItems }
+}
+
+function getOutlineStructureKey(entries: OutlineEntry[]) {
+  const keys: string[] = []
+  const visit = (entry: OutlineEntry) => {
+    keys.push(`${entry.nodeKey}:${entry.depth}`)
+    entry.children.forEach(visit)
+  }
+  entries.forEach(visit)
+  return keys.join("|")
+}
+
+function OutlineTree({
+  entries,
+  onSelect,
+}: {
+  entries: OutlineEntry[]
+  onSelect: (entry: OutlineEntry) => void
+}) {
+  const { items, expandedItems } = React.useMemo(
+    () => createOutlineTreeData(entries),
+    [entries]
+  )
+  const tree = useTree<OutlineTreeItemData>({
+    initialState: { expandedItems },
+    rootItemId: OUTLINE_ROOT_ID,
+    getItemName: (item) => item.getItemData().name,
+    isItemFolder: (item) => item.getItemData().children.length > 0,
+    dataLoader: {
+      getItem: (itemId) => items[itemId]!,
+      getChildren: (itemId) => items[itemId]?.children ?? [],
+    },
+    onPrimaryAction: (item) => {
+      const entry = item.getItemData().entry
+      if (entry) onSelect(entry)
+    },
+    features: [syncDataLoaderFeature, hotkeysCoreFeature],
+  })
+
+  return (
+    <Tree tree={tree} indent={12} aria-label="Document headings">
+      {tree.getItems().map((item) => {
+        const entry = item.getItemData().entry
+        return (
+          <TreeItem key={item.getId()} item={item} className="w-full">
+            <TreeItemLabel
+              className={
+                entry?.depth === 1
+                  ? "font-medium text-foreground"
+                  : entry?.depth === 3
+                    ? "text-xs"
+                    : "text-muted-foreground"
+              }
+            />
+          </TreeItem>
+        )
+      })}
+    </Tree>
   )
 }
 

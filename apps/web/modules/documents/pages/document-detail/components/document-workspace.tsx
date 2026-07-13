@@ -2,212 +2,324 @@
 
 import * as React from "react"
 import { ListTree } from "lucide-react"
+import type { EditorState, LexicalEditor } from "lexical"
+import { useToast } from "@workspace/feedback"
 
 import { useRegisterContextPanel } from "@/components/context-panel"
+import { ActiveEditorScope } from "@/modules/documents/editor/active-editor-context"
+import {
+  areMetricsEqual,
+  deriveMetrics,
+  type DocumentMetrics,
+} from "@/modules/documents/editor/derive-metrics"
+import {
+  areOutlinesEqual,
+  deriveOutline,
+  type OutlineEntry,
+} from "@/modules/documents/editor/derive-outline"
+import {
+  DocumentLexicalEditor,
+  type DocumentBlockType,
+} from "@/modules/documents/editor/document-lexical-editor"
+import {
+  createSaveCoordinator,
+  type SaveCoordinator,
+  type SaveCoordinatorStatus,
+} from "@/modules/documents/editor/save-coordinator"
+import {
+  createPersistenceSnapshot,
+  type PersistenceSnapshot,
+} from "@/modules/documents/editor/serialization"
 import { updateDocument } from "@/modules/documents/services/document-data"
 import type { DocumentRecord } from "@/modules/documents/types"
 
 import { DocumentContextPanel } from "./document-context-panel"
 import {
-  deriveOutline,
   deriveProperties,
   deriveRelatedDocuments,
-  type OutlineEntry,
 } from "./document-context-panel-data"
-import {
-  DocumentEditorPlaceholder,
-  type DocumentEditorPlaceholderHandle,
-} from "./document-editor-placeholder"
 import { DocumentEditorSurface } from "./document-editor-surface"
 import { DocumentHeader } from "./document-header"
+import { DocumentRuler } from "./document-ruler-header"
+import { DocumentSpine, DocumentSpineHeader } from "./document-spine"
 import type { DocumentSaveState } from "./document-status"
+import { DocumentStatusBar } from "./document-status-bar"
 import { DocumentToolbar } from "./document-toolbar"
+import { useDocumentPreference } from "./use-document-preference"
 
 interface DocumentWorkspaceProps {
   documentId: string
   initialDocument?: DocumentRecord | null
 }
 
-function countWords(plainText: string) {
-  const trimmed = plainText.trim()
-  return trimmed ? trimmed.split(/\s+/).length : 0
+interface WorkspaceSnapshot {
+  title: string
+  editor: PersistenceSnapshot | null
 }
 
+interface LiveWorkspaceSnapshot {
+  title: string
+  editorState: EditorState | null
+  savedResetTimer: number | null
+}
+
+const DEFAULT_ZOOM_PERCENT = 100
+const MIN_ZOOM_PERCENT = 70
+const MAX_ZOOM_PERCENT = 150
+const ZOOM_STEP_PERCENT = 10
+
+const DEFAULT_COLUMN_WIDTH_PX = 720
+const MIN_COLUMN_WIDTH_PX = 480
+const MAX_COLUMN_WIDTH_PX = 960
+const COLUMN_WIDTH_STEP_PX = 60
+
 /**
- * Composes the document page: owns prototype title/content/save-state and
- * the read-only toggle, renders the header + editor surface, and registers
- * this document's context-panel content for as long as the page is
- * mounted. Persistence, editor internals, and block-level state are
- * explicitly out of scope here — see `DocumentEditorPlaceholder` for the
- * Lexical integration seam.
+ * Composes the document page around the Lexical editor (ADR-3):
+ *
+ * - **Lexical owns live content.** No React state mirrors the document
+ *   body; this component keeps only the title, save status, and derived
+ *   read models (outline, metrics) recomputed from immutable EditorStates.
+ * - **Everything document-scoped lives inside this component**, which
+ *   `document-detail.tsx` remounts with `key={documentId}` — so the
+ *   composer, save coordinator, active-editor scope, and derived state
+ *   can never leak across a document switch.
+ * - Persistence goes through the token-sequenced save coordinator;
+ *   genuine-edit detection is defined in `editor/content-update.ts`.
+ *   Legacy documents are hydrated read-side only and migrate to the
+ *   envelope format on the first save a real user edit causes — never
+ *   from merely being opened.
  */
 export function DocumentWorkspace({
   documentId,
   initialDocument,
 }: DocumentWorkspaceProps) {
+  const toast = useToast()
+
   const [document, setDocument] = React.useState(initialDocument ?? null)
   const [title, setTitle] = React.useState(
     initialDocument?.title ?? "Untitled document"
   )
-  const [content, setContent] = React.useState(initialDocument?.content ?? "")
   const [saveState, setSaveState] = React.useState<DocumentSaveState>("clean")
   const [saveError, setSaveError] = React.useState<string>()
+  const [outline, setOutline] = React.useState<OutlineEntry[]>([])
+  const [metrics, setMetrics] = React.useState<DocumentMetrics>({
+    words: 0,
+    characters: 0,
+  })
+  const [blockType, setBlockType] = React.useState<DocumentBlockType>("Paragraph")
+  const [zoomPercent, setZoomPercent] = useDocumentPreference({
+    documentId,
+    key: "zoom",
+    defaultValue: DEFAULT_ZOOM_PERCENT,
+    min: MIN_ZOOM_PERCENT,
+    max: MAX_ZOOM_PERCENT,
+  })
+  const [columnWidthPx, setColumnWidthPx] = useDocumentPreference({
+    documentId,
+    key: "column-width",
+    defaultValue: DEFAULT_COLUMN_WIDTH_PX,
+    min: MIN_COLUMN_WIDTH_PX,
+    max: MAX_COLUMN_WIDTH_PX,
+  })
+  const [lastSavedAt, setLastSavedAt] = React.useState<number | null>(null)
   const [isEditorFocused, setIsEditorFocused] = React.useState(false)
   const [isReadOnly, setIsReadOnly] = React.useState(false)
-  const editorRef = React.useRef<DocumentEditorPlaceholderHandle>(null)
-
-  const isDirty = Boolean(
-    document && (title !== document.title || content !== document.content)
+  const [activeEditor, setActiveEditor] = React.useState<LexicalEditor | null>(
+    null
   )
+  const workspaceRef = React.useRef<HTMLDivElement>(null)
+  const [isFullscreen, setIsFullscreen] = React.useState(false)
 
-  const displayState: DocumentSaveState =
-    saveState === "saving" || saveState === "saved" || saveState === "error"
-      ? saveState
-      : isDirty
-        ? "dirty"
-        : "clean"
-
-  // ---------------------------------------------------------------------
-  // Autosave — what this genuinely does, and what it doesn't.
-  //
-  // THIS IS PROTOTYPE PERSISTENCE, NOT THE APPROVED EDITOR PERSISTENCE
-  // DESIGN. It exists to make the current textarea-based workspace
-  // prototype usable (survive a refresh, show a real save-state pill) —
-  // nothing more. Specifically, this implementation:
-  //   - writes through the existing localStorage-backed `document-data.ts`
-  //     service, not the planned IndexedDB persistence adapter;
-  //   - has no persisted compare-and-swap revision (nothing here detects
-  //     "someone else's save landed since I last read this document");
-  //   - has no cross-browser-tab stale-write recovery (two tabs editing the
-  //     same document will silently clobber each other, last-write-wins,
-  //     with no conflict surfaced to either tab);
-  //   - has no application-level save coordinator (no request sequencing,
-  //     no retry policy, no queued-write ordering beyond the single-timer
-  //     debounce described below).
-  // All of the above is expected to be replaced wholesale during the
-  // Lexical editor milestone, when persistence moves to the real adapter
-  // and gets a proper save coordinator. Do not treat anything below as
-  // satisfying the Lexical persistence specification — it satisfies only
-  // "the prototype shouldn't lose your typing while you're looking at it."
-  //
-  // WHERE IT WRITES: through the existing `document-data.ts` service
-  // (`updateDocument`), the same one the old form-styled shell used. That
-  // service writes to `window.localStorage` under the `synapcity.documents`
-  // key. This is real persistence, not a simulation — it survives a page
-  // refresh, because it's reading/writing the same localStorage record
-  // `loadDocumentById` reads on the next mount.
-  //
-  // WHAT ESTABLISHES "DIRTY": `document` (React state, below) is the last
-  // *successfully saved* snapshot — it only updates inside the try block
-  // after `updateDocument` returns a record. `isDirty` compares live
-  // `title`/`content` against that snapshot, so "Saved" genuinely means
-  // "matches what's in localStorage right now," not "we stopped tracking."
-  //
-  // CAN SAVE FAIL? Yes, for real, not simulated: `window.localStorage.setItem`
-  // throws `QuotaExceededError` if storage is full, and `updateDocument`
-  // returns `null` if the document record has been removed from storage out
-  // from under us (e.g. deleted in another tab). Both are caught below and
-  // surface as the real "error" state with the real error message — nothing
-  // here fabricates a failure for demo purposes.
-  //
-  // RACE BETWEEN A PENDING SAVE AND A NEW EDIT: the debounce is safe against
-  // this by construction, but only because the underlying write is
-  // synchronous. Every keystroke re-runs this effect; the cleanup cancels
-  // whichever `setTimeout` was still pending before scheduling a new one, so
-  // there is only ever one pending write, and it always writes the latest
-  // `title`/`content` closed over at the time it fires. If persistence
-  // becomes asynchronous (a network-backed Lexical save coordinator), this
-  // guarantee disappears — two in-flight saves could resolve out of order
-  // and a stale one could overwrite newer content. TODO(lexical-integration):
-  // a real coordinator needs sequencing (e.g. a monotonically increasing
-  // save token, dropping any response older than the latest request), which
-  // this prototype does not implement because it doesn't need to yet.
-  //
-  // CAN SWITCHING DOCUMENTS LOSE EDITS? This was a real gap found during
-  // review: `document-detail.tsx` remounts `DocumentWorkspace` with a fresh
-  // `key={documentId}` on navigation, and unmounting mid-debounce used to
-  // cancel the pending save outright — silently dropping up to 600ms of
-  // edits. The flush-on-unmount effect further below closes that specific
-  // gap with a best-effort synchronous write. It does not attempt to block
-  // navigation, queue retries, or handle a write failure during teardown
-  // (there's no UI left to show an error to at that point) — it's a
-  // narrower guarantee than a real save coordinator would give you.
   React.useEffect(() => {
-    if (!document || !isDirty || isReadOnly) return
+    const handleFullscreenChange = () => {
+      setIsFullscreen(window.document.fullscreenElement === workspaceRef.current)
+    }
+    window.document.addEventListener("fullscreenchange", handleFullscreenChange)
+    return () =>
+      window.document.removeEventListener(
+        "fullscreenchange",
+        handleFullscreenChange
+      )
+  }, [])
 
-    const timeout = window.setTimeout(() => {
-      setSaveState("saving")
-      setSaveError(undefined)
+  const toggleFullscreen = React.useCallback(() => {
+    if (window.document.fullscreenElement) {
+      void window.document.exitFullscreen()
+    } else {
+      void workspaceRef.current?.requestFullscreen()
+    }
+  }, [])
 
-      try {
-        const nextDocument = updateDocument(documentId, {
-          title,
-          content,
-          plainText: content.replace(/\s+/g, " ").trim(),
-        })
-
-        if (nextDocument) {
-          setDocument(nextDocument)
-          setSaveState("saved")
-          window.setTimeout(() => setSaveState("clean"), 1500)
-        } else {
-          setSaveState("error")
-          setSaveError("Save returned an empty document")
-        }
-      } catch (error) {
-        setSaveState("error")
-        setSaveError(error instanceof Error ? error.message : "Unknown error")
-      }
-    }, 600)
-
-    return () => window.clearTimeout(timeout)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [title, content])
-
-  // Flush-on-unmount: a ref mirrors the latest render's values so the
-  // unmount-only cleanup below (which closes over stale state otherwise)
-  // can see what the user actually typed, not what was true at mount time.
-  // The mirroring itself has to happen in an effect, not inline during
-  // render: refs are an escape hatch for effects/handlers, and writing to
-  // `.current` during render is a React correctness violation (the render
-  // may be discarded/retried without the write ever having "counted").
-  // Deliberately no dependency array — this must run after every render so
-  // the ref never lags behind the latest committed state.
-  const flushStateRef = React.useRef({ document, title, content, isReadOnly })
+  // The editor instance is imperative UI state, so consumers read it from a
+  // ref without causing workspace renders.
+  const activeEditorRef = React.useRef<LexicalEditor | null>(null)
+  const toastRef = React.useRef(toast)
   React.useEffect(() => {
-    flushStateRef.current = { document, title, content, isReadOnly }
+    toastRef.current = toast
   })
 
+  // Persistence inputs are imperative snapshots used only by effects and
+  // event handlers. They are intentionally refs rather than React state:
+  // mutating them must not render, while the visible title/status continue
+  // to use their dedicated state setters above.
+  const liveSnapshotRef = React.useRef<LiveWorkspaceSnapshot>({
+    title,
+    editorState: null,
+    savedResetTimer: null,
+  })
+  const coordinatorRef = React.useRef<SaveCoordinator | null>(null)
+
   React.useEffect(() => {
+    const liveSnapshot = liveSnapshotRef.current
+
+    const persistSnapshot = (snapshot: WorkspaceSnapshot) => {
+      const next = updateDocument(
+        documentId,
+        snapshot.editor
+          ? {
+              title: snapshot.title,
+              content: snapshot.editor.content,
+              plainText: snapshot.editor.plainText,
+            }
+          : { title: snapshot.title }
+      )
+      if (next) {
+        setDocument(next)
+      }
+      return next
+    }
+
+    const handleStatus = (status: SaveCoordinatorStatus) => {
+      if (liveSnapshot.savedResetTimer !== null) {
+        window.clearTimeout(liveSnapshot.savedResetTimer)
+        liveSnapshot.savedResetTimer = null
+      }
+
+      switch (status.phase) {
+        case "dirty":
+          setSaveState("dirty")
+          setSaveError(undefined)
+          break
+        case "saving":
+          setSaveState("saving")
+          setSaveError(undefined)
+          break
+        case "saved":
+          setSaveState("saved")
+          setSaveError(undefined)
+          setLastSavedAt(status.savedAt)
+          liveSnapshot.savedResetTimer = window.setTimeout(
+            () => setSaveState("clean"),
+            1500
+          )
+          break
+        case "error":
+          setSaveState("error")
+          setSaveError(status.message)
+          break
+      }
+    }
+
+    const coordinator = createSaveCoordinator<WorkspaceSnapshot>({
+      getSnapshot: () => ({
+        title: liveSnapshot.title,
+        editor: liveSnapshot.editorState
+          ? createPersistenceSnapshot(liveSnapshot.editorState)
+          : null,
+      }),
+      persist: persistSnapshot,
+      persistSync: (snapshot) => {
+        if (!persistSnapshot(snapshot)) {
+          throw new Error("Save returned an empty document")
+        }
+      },
+      onStatusChange: handleStatus,
+    })
+    coordinatorRef.current = coordinator
+
     return () => {
-      const {
-        document: baseline,
-        title: latestTitle,
-        content: latestContent,
-        isReadOnly: readOnly,
-      } = flushStateRef.current
+      if (liveSnapshot.savedResetTimer !== null) {
+        window.clearTimeout(liveSnapshot.savedResetTimer)
+      }
 
-      if (!baseline || readOnly) return
-
-      const stillDirty =
-        latestTitle !== baseline.title || latestContent !== baseline.content
-      if (!stillDirty) return
-
-      try {
-        updateDocument(documentId, {
-          title: latestTitle,
-          content: latestContent,
-          plainText: latestContent.replace(/\s+/g, " ").trim(),
-        })
-      } catch {
-        // Best-effort only: there is no mounted UI left to show a failure
-        // state to. A real save coordinator should surface this (e.g. via
-        // a toast that outlives the page) instead of swallowing it.
+      const error = coordinator.flush()
+      coordinator.dispose()
+      coordinatorRef.current = null
+      if (error) {
+        toastRef.current.error(
+          `Your latest document changes could not be saved: ${error.message}`
+        )
       }
     }
   }, [documentId])
 
-  const outline = React.useMemo(() => deriveOutline(content), [content])
+  const handleContentChanged = React.useCallback(
+    (editorState: EditorState) => {
+      liveSnapshotRef.current.editorState = editorState
+      const nextMetrics = deriveMetrics(editorState)
+      setMetrics((previous) =>
+        areMetricsEqual(previous, nextMetrics) ? previous : nextMetrics
+      )
+      const nextOutline = deriveOutline(editorState)
+      setOutline((previous) =>
+        areOutlinesEqual(previous, nextOutline) ? previous : nextOutline
+      )
+    },
+    []
+  )
+
+  const handleGenuineEdit = React.useCallback(
+    (editorState: EditorState) => {
+      liveSnapshotRef.current.editorState = editorState
+      coordinatorRef.current?.schedule()
+    },
+    []
+  )
+
+  const handleTitleChange = (value: string) => {
+    liveSnapshotRef.current.title = value
+    setTitle(value)
+    // A real user edit; the coordinator no-ops while paused (read-only).
+    coordinatorRef.current?.schedule()
+  }
+
+  const handleToggleReadOnly = () => {
+    const nextReadOnly = !isReadOnly
+    const coordinator = coordinatorRef.current
+    if (nextReadOnly) {
+      // Entering read-only: pending edits were made while editable, so
+      // flush them before pausing rather than dropping the last <600ms.
+      const error = coordinator?.flush() ?? null
+      if (error) {
+        setSaveState("error")
+        setSaveError(error.message)
+      }
+      coordinator?.pause()
+    } else {
+      coordinator?.resume()
+    }
+    setIsReadOnly(nextReadOnly)
+  }
+
+  const handleEditorChange = React.useCallback(
+    (editor: LexicalEditor | null) => {
+      activeEditorRef.current = editor
+      setActiveEditor(editor)
+    },
+    []
+  )
+
+  const handleSelectOutlineEntry = React.useCallback((entry: OutlineEntry) => {
+    activeEditorRef.current
+      ?.getElementByKey(entry.nodeKey)
+      ?.scrollIntoView({ behavior: "smooth", block: "start" })
+  }, [])
+
+  const handleSelectIntro = React.useCallback(() => {
+    const rootElement = activeEditorRef.current?.getRootElement()
+    rootElement?.scrollIntoView({ behavior: "smooth", block: "start" })
+  }, [])
+
   const related = React.useMemo(
     () => deriveRelatedDocuments(documentId),
     [documentId]
@@ -225,26 +337,6 @@ export function DocumentWorkspace({
     [document, documentId]
   )
 
-  const handleSelectOutlineEntry = React.useCallback(
-    (entry: OutlineEntry) => {
-      const lineIndex = Number.parseInt(entry.id.replace("heading-", ""), 10)
-      if (Number.isNaN(lineIndex)) return
-
-      // Outline entries are recomputed from `content` on every render (see
-      // `deriveOutline` above), so in practice an entry can't outlive the
-      // line it describes — the panel and the content it targets are
-      // always derived from the same value. This clamp is a defensive
-      // backstop, not evidence that staleness is expected: it protects
-      // `scrollToLine` from an out-of-range index if that invariant is ever
-      // broken by a future change, rather than assuming it never will be.
-      const maxLineIndex = Math.max(content.split("\n").length - 1, 0)
-      const safeLineIndex = Math.min(Math.max(lineIndex, 0), maxLineIndex)
-
-      editorRef.current?.scrollToLine(safeLineIndex)
-    },
-    [content]
-  )
-
   useRegisterContextPanel({
     header: { title: "Document", description: title || "Untitled document" },
     collapsedIcon: <ListTree />,
@@ -259,42 +351,92 @@ export function DocumentWorkspace({
   })
 
   return (
-    <div className="flex flex-1 flex-col gap-6">
-      <DocumentHeader
-        title={title}
-        onTitleChange={setTitle}
-        updatedAt={document?.updatedAt ?? new Date().toISOString()}
-        wordCount={countWords(content)}
-        saveState={displayState}
-        saveError={saveError}
-        isCompact={isEditorFocused}
-        isReadOnly={isReadOnly}
-        onToggleReadOnly={() => setIsReadOnly((value) => !value)}
-      />
+    <ActiveEditorScope
+      editor={activeEditor}
+      onEditorChange={handleEditorChange}
+    >
+      <div
+        ref={workspaceRef}
+        className="document-workspace flex min-h-0 flex-1 flex-col gap-6 bg-background"
+        style={
+          {
+            "--editor-zoom": zoomPercent / 100,
+            "--editor-max-width": `${columnWidthPx}px`,
+          } as React.CSSProperties
+        }
+      >
+        <DocumentHeader
+          title={title}
+          onTitleChange={handleTitleChange}
+          updatedAt={document?.updatedAt ?? new Date().toISOString()}
+          saveState={saveState}
+          saveError={saveError}
+          isCompact={isEditorFocused}
+          isReadOnly={isReadOnly}
+          onToggleReadOnly={handleToggleReadOnly}
+        />
 
-      <DocumentEditorSurface
-        document={{ id: documentId, title }}
-        isFocused={isEditorFocused}
-        isReadOnly={isReadOnly}
-        toolbar={
-          <DocumentToolbar
-            isFocused={isEditorFocused}
-            value={content}
-            onChange={setContent}
-            editorRef={editorRef}
-          />
-        }
-        editorSlot={
-          <DocumentEditorPlaceholder
-            ref={editorRef}
-            value={content}
-            onChange={setContent}
-            onFocus={() => setIsEditorFocused(true)}
-            onBlur={() => setIsEditorFocused(false)}
-            readOnly={isReadOnly}
-          />
-        }
-      />
-    </div>
+        <DocumentEditorSurface
+          document={{ id: documentId, title }}
+          isFocused={isEditorFocused}
+          isReadOnly={isReadOnly}
+          toolbar={<DocumentToolbar isFocused={isEditorFocused} />}
+          spineHeader={<DocumentSpineHeader />}
+          spineNav={
+            <DocumentSpine
+              outline={outline}
+              onSelectIntro={handleSelectIntro}
+              onSelectEntry={handleSelectOutlineEntry}
+            />
+          }
+          ruler={
+            <DocumentRuler
+              columnWidthPx={columnWidthPx}
+              zoom={zoomPercent / 100}
+            />
+          }
+          statusBar={
+            <DocumentStatusBar
+              words={metrics.words}
+              characters={metrics.characters}
+              blockType={blockType}
+              saved={{ state: saveState, lastSavedAt }}
+              column={{
+                widthPx: columnWidthPx,
+                canDecrease: columnWidthPx > MIN_COLUMN_WIDTH_PX,
+                canIncrease: columnWidthPx < MAX_COLUMN_WIDTH_PX,
+                onDecrease: () =>
+                  setColumnWidthPx(columnWidthPx - COLUMN_WIDTH_STEP_PX),
+                onIncrease: () =>
+                  setColumnWidthPx(columnWidthPx + COLUMN_WIDTH_STEP_PX),
+              }}
+              zoom={{
+                percent: zoomPercent,
+                canDecrease: zoomPercent > MIN_ZOOM_PERCENT,
+                canIncrease: zoomPercent < MAX_ZOOM_PERCENT,
+                onDecrease: () => setZoomPercent(zoomPercent - ZOOM_STEP_PERCENT),
+                onIncrease: () => setZoomPercent(zoomPercent + ZOOM_STEP_PERCENT),
+                onReset: () => setZoomPercent(DEFAULT_ZOOM_PERCENT),
+              }}
+              fullscreen={{
+                isFullscreen,
+                onToggle: toggleFullscreen,
+              }}
+            />
+          }
+          editorSlot={
+            <DocumentLexicalEditor
+              initialContent={initialDocument?.content ?? ""}
+              readOnly={isReadOnly}
+              onFocus={() => setIsEditorFocused(true)}
+              onBlur={() => setIsEditorFocused(false)}
+              onContentChanged={handleContentChanged}
+              onGenuineEdit={handleGenuineEdit}
+              onBlockTypeChanged={setBlockType}
+            />
+          }
+        />
+      </div>
+    </ActiveEditorScope>
   )
 }

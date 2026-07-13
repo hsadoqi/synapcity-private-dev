@@ -19,6 +19,13 @@ interface DocumentEditorSurfaceProps {
   isFocused: boolean
   isReadOnly: boolean
   className?: string
+  statusBar?: React.ReactNode
+  /** Measurement ruler above the content column; renders full-bleed inside the content region. */
+  ruler?: React.ReactNode
+  /** Fixed-width `SPINE` label above the section nav; only rendered together with `spineNav`. */
+  spineHeader?: React.ReactNode
+  /** Fixed-width section navigation to the left of the content column. */
+  spineNav?: React.ReactNode
 }
 
 /**
@@ -34,11 +41,15 @@ export function DocumentEditorSurface({
   isFocused,
   isReadOnly,
   className,
+  statusBar,
+  ruler,
+  spineHeader,
+  spineNav,
 }: DocumentEditorSurfaceProps) {
   return (
     <div
       className={cn(
-        "flex flex-1 flex-col rounded-xl border bg-card transition-colors duration-200 ease-out",
+        "flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border bg-card transition-colors duration-200 ease-out",
         isFocused ? "border-ring/60" : "border-border",
         className
       )}
@@ -53,11 +64,30 @@ export function DocumentEditorSurface({
 
       {toolbar && !isReadOnly && toolbar}
 
-      <div className="mx-auto w-full max-w-[68ch] flex-1 px-6 py-8 md:px-10 md:py-10">
-        <div aria-disabled={isReadOnly} className={cn(isReadOnly && "opacity-70")}>
-          {editorSlot}
+      <div className="flex min-h-0 flex-1">
+        {spineNav && (
+          <div className="flex shrink-0 flex-col">
+            {spineHeader}
+            {spineNav}
+          </div>
+        )}
+
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+          {ruler}
+          <div className="relative mx-auto min-h-0 w-full max-w-(--editor-max-width) flex-1 overflow-hidden">
+            <div
+              aria-disabled={isReadOnly}
+              className={cn(
+                "absolute inset-0 no-scrollbar overflow-y-auto overscroll-contain px-6 py-8 md:px-10 md:py-10",
+                isReadOnly && "opacity-70"
+              )}
+            >
+              {editorSlot}
+            </div>
+          </div>
         </div>
       </div>
+      {statusBar}
     </div>
   )
 }

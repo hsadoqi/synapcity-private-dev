@@ -3,35 +3,11 @@ import type { DocumentRecord } from "@/modules/documents/types"
 
 /**
  * V0 context-panel content is deliberately mock/derived-from-local-state
- * only. Outline is parsed from the markdown-ish `content` string as a
- * stand-in for a real heading index; Related is a naive sibling lookup.
- * None of this should be mistaken for real backlink or search infra —
- * see the module README for what's intentionally deferred.
+ * only. Related is a naive sibling lookup — not real backlink or search
+ * infra; see the module README for what's intentionally deferred.
+ * (Outline derivation moved to `modules/documents/editor/derive-outline.ts`
+ * with the Lexical integration: it now reads HeadingNodes, not markdown.)
  */
-
-export interface OutlineEntry {
-  id: string
-  depth: 1 | 2 | 3
-  label: string
-}
-
-const HEADING_PATTERN = /^(#{1,3})\s+(.*)$/
-
-export function deriveOutline(content: string): OutlineEntry[] {
-  return content
-    .split("\n")
-    .map((line, index) => {
-      const match = HEADING_PATTERN.exec(line.trim())
-      if (!match) return null
-
-      const depth = match[1]?.length as 1 | 2 | 3
-      const label = match[2]?.trim()
-      if (!label) return null
-
-      return { id: `heading-${index}`, depth, label }
-    })
-    .filter((entry): entry is OutlineEntry => entry !== null)
-}
 
 export interface RelatedDocumentEntry {
   id: string
@@ -67,18 +43,20 @@ export function deriveProperties(
     { label: "Slug", value: document.slug },
     {
       label: "Created",
-      value: new Date(document.createdAt).toLocaleDateString(undefined, {
+      value: new Date(document.createdAt).toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
         year: "numeric",
+        timeZone: "UTC",
       }),
     },
     {
       label: "Updated",
-      value: new Date(document.updatedAt).toLocaleDateString(undefined, {
+      value: new Date(document.updatedAt).toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
         year: "numeric",
+        timeZone: "UTC",
       }),
     },
   ]
