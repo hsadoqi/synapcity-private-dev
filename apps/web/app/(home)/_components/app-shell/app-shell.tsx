@@ -25,7 +25,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const contextPanel = useContextPanelController(contextPanelRef)
   const [isMobileContextOpen, setIsMobileContextOpen] = React.useState(false)
   const mainContent = (
-    <main id="primary-content" className="size-full min-w-0 overflow-auto">
+    <main
+      id="primary-content"
+      className="size-full min-w-0 overflow-auto bg-background"
+    >
       {children}
     </main>
   )
@@ -52,7 +55,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 panelRef={contextPanelRef}
                 defaultSize="24rem"
                 minSize="18rem"
-                maxSize="30rem"
+                maxSize="48rem"
                 collapsible
                 collapsedSize="2.5rem"
                 onResize={contextPanel.syncCollapsedState}

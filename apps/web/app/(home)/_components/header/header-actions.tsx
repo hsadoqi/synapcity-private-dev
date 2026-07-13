@@ -12,13 +12,19 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@workspace/ui/components/primitives/tooltip"
-import { Separator } from "@workspace/ui/components"
+import {
+  Separator,
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "@workspace/ui/components"
 import { SidebarSearch } from "../sidebar/sidebar-search"
 import { cn } from "@workspace/ui/lib/utils"
 import useClickOutside from "@workspace/ui/hooks/use-click-outside"
 import { useRef } from "react"
 import { useCommand } from "@/components/command/command-context"
 import { MobileHeaderActions } from "./mobile-header-actions"
+import { ThemeFormSheet } from "@/modules/theme/components/form-components/theme-form-sheet"
 
 function HeaderIconButton({
   label,
@@ -66,6 +72,8 @@ export function AppGlobalActions({
 }: {
   routeContext: AppRouteContext
 }) {
+  const [popoverOpen, setPopoverOpen] = React.useState(false)
+  const { resolvedTheme, setTheme } = useTheme()
   const createHref =
     routeContext.section === "dashboards" ||
     routeContext.section === "dashboard"
@@ -77,7 +85,31 @@ export function AppGlobalActions({
       <div className="hidden items-center gap-2 md:flex">
         <CommandTrigger />
         <Separator className="mx-1 h-6" orientation="vertical" />
-        <ThemeTrigger />
+        <Sheet open={popoverOpen} onOpenChange={setPopoverOpen}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <SheetTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label="Open theme editor"
+                  type="button"
+                >
+                  <Palette />
+                </Button>
+              </SheetTrigger>
+            </TooltipTrigger>
+            <TooltipContent>Theme editor</TooltipContent>
+          </Tooltip>
+          <SheetContent className="flex p-0 sm:max-w-md">
+            <ThemeFormSheet
+              onClose={() => setPopoverOpen(false)}
+              onSubmit={(data) => setTheme(data.darkMode ? "dark" : "light")}
+              isOpen={popoverOpen}
+              initialDarkMode={resolvedTheme === "dark"}
+            />
+          </SheetContent>
+        </Sheet>
         <AppearanceToggle />
         <Separator className="mx-1 h-6" orientation="vertical" />
         <AddNewTrigger createHref={createHref} />

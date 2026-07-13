@@ -15,6 +15,11 @@ import {
 } from "@/modules/theme"
 import { EmptyState, Button } from "@workspace/ui/components"
 import { useToast } from "@workspace/feedback"
+import { ColorPickerCard } from "../../../../modules/theme/components/display/color-picker-card"
+import {
+  hexToOklch,
+  oklchToHex,
+} from "@/modules/theme/color-utils"
 
 const paletteSteps = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950]
 
@@ -41,6 +46,26 @@ export default function ThemeSettingsPage() {
     themes.find((theme) => theme.id === selectedThemeId) ??
     themes[0] ??
     DEFAULT_THEME_RECORD
+
+  const draftTheme = React.useMemo<ThemeRecord>(
+    () => ({
+      ...activeTheme,
+      name,
+      primaryOklch,
+      accentOklch,
+    }),
+    [accentOklch, activeTheme, name, primaryOklch]
+  )
+
+  const handlePresetChange = (themeId: string) => {
+    const selectedTheme = themes.find((theme) => theme.id === themeId)
+    if (!selectedTheme) return
+
+    setSelectedThemeId(themeId)
+    setName(selectedTheme.name)
+    setPrimaryOklch(selectedTheme.primaryOklch)
+    setAccentOklch(selectedTheme.accentOklch)
+  }
 
   const handleSaveTheme = async () => {
     if (isCreating || !name.trim()) {
@@ -80,9 +105,6 @@ export default function ThemeSettingsPage() {
         duration: 3000,
       })
 
-      setName("New theme")
-      setPrimaryOklch(DEFAULT_THEME_RECORD.primaryOklch)
-      setAccentOklch(DEFAULT_THEME_RECORD.accentOklch)
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to create theme"
       setCreateError(message)
@@ -109,9 +131,16 @@ export default function ThemeSettingsPage() {
         <ThemeScopeProvider
           scopeType="root"
           scopeId="theme-preview"
-          theme={activeTheme}
+          theme={draftTheme}
           className="rounded-xl border border-border bg-card p-6 shadow-sm"
         >
+          <ColorPickerCard
+            label="Primary Color"
+            formData={oklchCssToHex(primaryOklch)}
+            defaultFormData={oklchCssToHex(DEFAULT_THEME_RECORD.primaryOklch)}
+            onChange={(hex) => setPrimaryOklch(hexToOklchCss(hex))}
+          />
+
           <div className="space-y-4">
             <div className="rounded-lg border border-border bg-background p-4">
               <div className="text-sm text-muted-foreground">
@@ -149,7 +178,7 @@ export default function ThemeSettingsPage() {
             <span className="font-medium">Theme preset</span>
             <select
               value={selectedThemeId}
-              onChange={(event) => setSelectedThemeId(event.target.value)}
+              onChange={(event) => handlePresetChange(event.target.value)}
               className="w-full rounded-lg border border-border bg-background px-3 py-2"
             >
               {themes.map((theme) => (
@@ -223,11 +252,34 @@ export default function ThemeSettingsPage() {
                 className="py-6"
               />
             ) : (
-              <div className="mt-2">{assignments.length} saved assignment(s)</div>
+              <div className="mt-2">
+                {assignments.length} saved assignment(s)
+              </div>
             )}
           </div>
         </div>
       </div>
     </div>
   )
+}
+
+function oklchCssToHex(value: string): string {
+  const match =
+    /oklch\(\s*([0-9.]+)(%)?\s+([0-9.]+)\s+([0-9.]+)\s*\)/i.exec(value)
+
+  if (!match) {
+    return "#3B82F6"
+  }
+
+  return oklchToHex({
+    l: Number(match[1]) / (match[2] ? 100 : 1),
+    c: Number(match[3]),
+    h: Number(match[4]),
+  })
+}
+
+function hexToOklchCss(value: string): string {
+  const color = hexToOklch(value)
+
+  return `oklch(${color.l.toFixed(4)} ${color.c.toFixed(4)} ${color.h.toFixed(2)})`
 }
