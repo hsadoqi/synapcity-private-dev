@@ -27,20 +27,23 @@ Routes:
   selection state (e.g. showing "Bold" as pressed when the caret is already
   inside bold text) — that needs continuous selection tracking a real
   editor provides for free, which is out of scope here.
-- `DocumentContextPanel` — document-level context (Outline/Properties/
-  Related), registered into the shared context panel via
-  `useRegisterContextPanel` for as long as the page is mounted. Outline
-  entries are parsed from the same plain-text `content` a real editor would
-  replace (`document-context-panel-data.ts`, isolated on purpose so it dies
-  cleanly with the rest of the prototype instead of leaking into whatever
-  outline model Lexical ends up using).
+- `DocumentContextPanel` — owns the document-level context section ids,
+  selection, and Outline/Properties/Related bodies. `DocumentWorkspace`
+  registers that content into the shared context panel via
+  `useRegisterContextPanel` for as long as the page is mounted. Outline entries
+  are parsed from the same plain-text `content` a real editor would replace
+  (`document-context-panel-data.ts`, isolated on purpose so it dies cleanly
+  with the rest of the prototype instead of leaking into whatever outline
+  model Lexical ends up using).
 
 ## Context panel
 
-The context panel is shared app-shell chrome (see
-`components/context-panel`), not owned by this module. This module only
-publishes what it wants shown there while a document is open; the panel
-itself has no document-specific knowledge.
+The app shell owns the context panel's desktop/mobile containers and its
+resize/collapse behavior (see `components/context-panel`). This module owns the
+document section ids, selection, and bodies, and publishes them as opaque
+registered content while a document is open. Shared context-panel code does
+not import or navigate document sections. See the
+[UI component ownership contract](../../../../docs/architecture/ui-component-ownership.md).
 
 Deliberately deferred (see inline `TODO(lexical-integration)` comments):
 - Real rich-text document model, plugins, and serialization
