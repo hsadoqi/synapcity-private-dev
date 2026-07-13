@@ -1,5 +1,6 @@
 "use client"
 
+import * as React from "react"
 import {
   Sheet,
   SheetContent,
@@ -9,6 +10,7 @@ import {
 } from "@workspace/ui/components"
 
 import { ContextPanelContent } from "./context-panel-content"
+import { useContextPanelSlot } from "./context-panel-slot"
 
 type ContextPanelSheetProps = {
   open: boolean
@@ -19,19 +21,22 @@ export function ContextPanelSheet({
   open,
   onOpenChange,
 }: ContextPanelSheetProps) {
+  const slot = useContextPanelSlot()
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="w-[min(24rem,calc(100vw-1rem))] sm:max-w-md lg:hidden"
+        className="flex w-[min(24rem,calc(100vw-1rem))] flex-col sm:max-w-md lg:hidden"
       >
         <SheetHeader className="border-b pr-12">
-          <SheetTitle>Context</SheetTitle>
+          <SheetTitle>{slot?.header.title ?? "Context"}</SheetTitle>
           <SheetDescription>
-            Tools and information for this workspace.
+            {slot?.header.description ??
+              "Tools and information for this workspace."}
           </SheetDescription>
         </SheetHeader>
-        <ContextPanelContent />
+        {slot ? slot.body : <ContextPanelContent />}
       </SheetContent>
     </Sheet>
   )

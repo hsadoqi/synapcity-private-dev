@@ -1,5 +1,6 @@
 "use client"
 
+import * as React from "react"
 import { PanelRightOpen } from "lucide-react"
 
 import { Button } from "@workspace/ui/components"
@@ -8,6 +9,7 @@ import { cn } from "@workspace/ui/lib/utils"
 import { ContextPanelContent } from "./context-panel-content"
 import { ContextPanelHeader } from "./context-panel-header"
 import { contextPanelNavigationSections } from "./context-panel-navigation"
+import { useContextPanelSlot } from "./context-panel-slot"
 
 type DesktopContextPanelProps = {
   collapsed: boolean
@@ -20,6 +22,8 @@ export function DesktopContextPanel({
   onCollapse,
   onExpand,
 }: DesktopContextPanelProps) {
+  const slot = useContextPanelSlot()
+
   return (
     <aside
       aria-label="Context panel"
@@ -29,7 +33,6 @@ export function DesktopContextPanel({
       )}
     >
       {collapsed ? (
-
         <div className="flex flex-col items-center justify-start">
           <div className="flex h-12 items-center justify-center">
             <Button
@@ -38,26 +41,42 @@ export function DesktopContextPanel({
               size="icon-lg"
               aria-label="Expand context panel"
               onClick={onExpand}
-              >
+            >
               <PanelRightOpen />
             </Button>
           </div>
-          {contextPanelNavigationSections.map((section => (
+          {slot?.collapsedIcon ? (
             <Button
-              key={section.title}
               variant="ghost"
               size="icon-lg"
               aria-label="Expand"
               onClick={onExpand}
             >
-              <section.icon/>
+              {slot.collapsedIcon}
             </Button>
-          )))}
-            </div>
+          ) : (
+            !slot &&
+            contextPanelNavigationSections.map((section) => (
+              <Button
+                key={section.title}
+                variant="ghost"
+                size="icon-lg"
+                aria-label="Expand"
+                onClick={onExpand}
+              >
+                <section.icon />
+              </Button>
+            ))
+          )}
+        </div>
       ) : (
         <>
-          <ContextPanelHeader onCollapse={onCollapse} />
-          <ContextPanelContent />
+          <ContextPanelHeader
+            title={slot?.header.title}
+            description={slot?.header.description}
+            onCollapse={onCollapse}
+          />
+          {slot ? slot.body : <ContextPanelContent />}
         </>
       )}
     </aside>

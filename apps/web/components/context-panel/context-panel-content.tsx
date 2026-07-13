@@ -1,5 +1,6 @@
 "use client"
 
+import * as React from "react"
 import { Bell, ChevronRight, Settings2 } from "lucide-react"
 
 import {
