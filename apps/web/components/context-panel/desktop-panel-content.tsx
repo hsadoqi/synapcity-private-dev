@@ -73,7 +73,6 @@ export function DesktopContextPanel({
         <>
           <ContextPanelHeader
             title={slot?.header.title}
-            description={slot?.header.description}
             onCollapse={onCollapse}
           />
           {slot ? slot.body : <ContextPanelContent />}

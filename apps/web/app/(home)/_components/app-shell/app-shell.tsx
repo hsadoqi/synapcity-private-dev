@@ -27,7 +27,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const mainContent = (
     <main
       id="primary-content"
-      className="size-full min-w-0 overflow-auto bg-background"
+      className="size-full min-w-0 overflow-y-auto bg-background text-foreground"
     >
       {children}
     </main>
@@ -36,7 +36,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <>
       <AppSidebar />
-      <SidebarInset className="min-h-svh min-w-0 overflow-hidden">
+      <SidebarInset className="min-w-0 overflow-hidden">
         <AppHeader onOpenContextPanel={() => setIsMobileContextOpen(true)} />
 
         <div className="min-h-0 flex-1">
