@@ -8,8 +8,8 @@ vi.mock("@/modules/documents/services/document-data", () => ({
   loadDocumentById: vi.fn(),
 }))
 
-vi.mock("./components/document-editor-shell", () => ({
-  DocumentEditorShell: () => <div>Document editor shell</div>,
+vi.mock("./components/document-workspace", () => ({
+  DocumentWorkspace: () => <div>Document workspace</div>,
 }))
 
 const { loadDocumentById } = await import(

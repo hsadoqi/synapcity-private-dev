@@ -1,5 +1,4 @@
 export type { DocumentRecord } from "./types"
 export { DocumentListPage } from "./pages/document-list/document-list"
 export { DocumentDetailPage } from "./pages/document-detail/document-detail"
-export { DocumentEditorShell } from "./pages/document-detail/components/document-editor-shell"
-export { DocumentMetadataPanel } from "./pages/document-detail/components/document-metadata-panel"
+export { DocumentWorkspace } from "./pages/document-detail/components/document-workspace"

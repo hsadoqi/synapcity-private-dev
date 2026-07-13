@@ -59,10 +59,10 @@ function QuickActionCard({ item }: QuickActionCardProps) {
               aria-hidden="true"
             />
           ) : null}
-          <div className="min-w-0">
+          <div className="flex min-w-0 flex-wrap">
             <h3 className="text-sm font-medium">{item.title}</h3>
             {item.description ? (
-              <p className="mt-1 text-xs leading-5 text-muted-foreground">
+              <p className="mt-1 text-xs leading-5 whitespace-pre-wrap text-muted-foreground">
                 {item.description}
               </p>
             ) : null}
@@ -81,11 +81,13 @@ export const QuickActionsSection = ({
   return (
     <section
       aria-label="Quick actions"
-      className="mb-12 grid grid-cols-1 gap-3 @md/home:grid-cols-2 @4xl/home:grid-cols-4"
+      className="@container/actions mb-12 flex flex-12 flex-col"
     >
-      {actions.map((item) => (
-        <QuickActionCard key={`${item.href}-${item.title}`} item={item} />
-      ))}
+      <div className="@md/home @m/actions:grid-cols-2 grid grid-cols-1 gap-3 @lg/actions:grid-cols-3">
+        {actions.map((item) => (
+          <QuickActionCard key={`${item.href}-${item.title}`} item={item} />
+        ))}
+      </div>
     </section>
   )
 }

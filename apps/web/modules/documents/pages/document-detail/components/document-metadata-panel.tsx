@@ -1,3 +1,8 @@
+// SUPERSEDED — kept only because file deletion wasn't approved in this
+// session. This was already unused before this pass (never imported by
+// document-detail.tsx). Its role is now covered by the "Properties" tab in
+// `document-context-panel.tsx`, registered into the shared context panel
+// by `document-workspace.tsx`. Safe to delete.
 import type { DocumentRecord } from "@/modules/documents/types"
 
 interface DocumentMetadataPanelProps {

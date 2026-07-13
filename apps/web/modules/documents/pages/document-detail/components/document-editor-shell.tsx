@@ -1,3 +1,8 @@
+// SUPERSEDED — kept only because file deletion wasn't approved in this
+// session. Nothing imports this anymore: `document-detail.tsx` now renders
+// `DocumentWorkspace` (./document-workspace.tsx), which composes
+// DocumentHeader + DocumentEditorSurface + DocumentEditorPlaceholder
+// instead of this form-styled shell. Safe to delete.
 "use client"
 
 import * as React from "react"
