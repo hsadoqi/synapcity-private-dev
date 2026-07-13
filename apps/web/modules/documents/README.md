@@ -82,11 +82,6 @@ usable while Lexical integration happens separately.
   test — confirmed via repo-wide search. Marked `SUPERSEDED` at the top of
   the file. Kept only because file deletion wasn't approved in the session
   that replaced it; delete after review/approval.
-- `components/document-metadata-panel.tsx` — **superseded**, replaced by
-  the context panel's Properties tab. Was already unused before this pass.
-  Marked `SUPERSEDED` at the top of the file. Kept only because file
-  deletion wasn't approved; delete after review/approval.
-
 Autosave (`document-workspace.tsx`) is prototype persistence, not the
 approved editor persistence design — see the comment block at the top of
 the autosave effect for the full list of what it does and doesn't
