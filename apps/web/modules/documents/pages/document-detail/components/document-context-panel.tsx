@@ -28,7 +28,10 @@ export type DocumentContextSectionId = "outline" | "properties" | "related"
 const DOCUMENT_CONTEXT_SECTIONS: ReadonlyArray<{
   id: DocumentContextSectionId
   label: string
-  icon: React.ComponentType<{ className?: string; "aria-hidden"?: boolean }>
+  icon: React.ComponentType<{
+    className?: string
+    "aria-hidden"?: React.AriaAttributes["aria-hidden"]
+  }>
 }> = [
   { id: "outline", label: "Outline", icon: ListTree },
   { id: "properties", label: "Properties", icon: SlidersHorizontal },
